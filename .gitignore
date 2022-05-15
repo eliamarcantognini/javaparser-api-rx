@@ -4,3 +4,5 @@
 /gradle.xml
 /build/
 /out/
+/bin/
+/output.json

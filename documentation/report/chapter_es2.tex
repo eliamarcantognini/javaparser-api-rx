@@ -1,0 +1,45 @@
+\section{Analisi del problema}
+
+Si vuole implementare una libreria che metta a disposizione una serie di funzionalità minimali per l'analisi di un progetto sviluppato utilizzando il linguaggio Java.
+%
+Le funzionalità fornite dalla libreria devono dar la possibilità di:
+
+\begin{enumerate}
+    \item Analizzare un'interfaccia, restituendo il nome stesso e un elenco dei nomi dei metodi contenuti al suo interno.
+    
+    \item Analizzare una classe, restituendo il suo nome e un elenco dei metodi in essa contenuti, comprensivi di alcune informazioni ritenute essenziali: nome, modificatori (public, private, ecc.) e la loro posizione all'interno del file, specificando linea di inizio e di fine.
+    
+    \item Analizzare un package, riportando un analisi delle interfacce e delle classi al suo interno.
+    
+    \item Analizzare il progetto stesso, riportando un'analisi dei suoi package.
+\end{enumerate}
+
+Queste analisi si possono considerare a cascata, dato che le ultime si compongono di quelle precedenti.
+
+Ulteriore requisito è quello di realizzare la libreria in modo asincrono, utilizzando un event-loop come architettura di riferimento.
+%
+In questo modo sarà possibile utilizzare la libreria in modo non bloccante, grazie al meccanismo delle \textit{Future}.
+
+Inoltre, deve essere possibile poter interrompere in qualsiasi momento l'esecuzione di un'analisi precedentemente richiesta.
+
+Infine, si intende realizzare una semplice applicazione provvista di GUI per poter testare le funzionalità messe a disposizione dalla libreria mostrando a schermo i risultati delle varie analisi.
+
+\section{Strategia risolutiva}
+
+La soluzione implementata, come specificato nei requisiti, si basa su programmazione asincrona in cui le varie operazioni vengono eseguite tramite l'utilizzo di un event-loop.
+%
+Per realizzare questo comportamento si è utilizzato il \textit{framework} \textit{Vertx}, che permette appunto di realizzare funzionalità asincrone in modo semplice, senza doversi preoccupare di molti aspetti di basso livello, come l'utilizzo effettivo dei \textit{Thread}.
+
+Per quanto riguarda l'analisi degli elementi di un progetto Java si è utilizzato la libreria \textit{Java Parser}, che permette di creare degli \textit{Abstract Sintaxt Tree} (AST) a partire da un file .java e visitare i sui nodi per recuperare le informazioni di interesse.
+%
+Nello specifico, la visita viene effettuata tramite dei \textit{Visitor} in cui è possibile specificare il comportamento da adottare quando viene visitato un certo tipo di nodo.
+
+Utilizzo di un \textit{event-loop} esterno che dovrà gestire i vari eventi che nel nostro caso sono le chiamate ai metodi per ottenere un determinato report.
+
+La funzionalità analyzeProject lancerà una serie di eventi in base al tipo di file che si incontra durante la visita del progetto, ognuno dei quali relativo ad un certo report.
+
+Si pensa ad una possibile soluzione in cui per ogni report si va a creare un event-loop personale in cui gestire i singoli elementi da analizzare. Tale soluzione diventa interessante se si riuscisse a fare in modo che l'event-loop generale avvia un event-loop figlio per ottenere un certo report e poi va a gestire un altro evento (la richiesta di un altro report). Deve essere l'event-loop figlio a comunicare di aver terminato al padre per fargli raccogliere il risultato. 
+
+\section{Architettura ed implementazione}
+
+I metodi getReport devono essere asincroni quindi tornano una Future del tipo relativo al report che si vuole ottenere (per esempio Future<ClassReport>)

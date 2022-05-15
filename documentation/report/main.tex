@@ -1,0 +1,71 @@
+\documentclass[12pt,a4paper,openright]{report}
+\usepackage[legalpaper, portrait, margin=1.2in]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[italian]{babel}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{hyperref}
+% \usepackage{soul,xcolor}
+% \usepackage{soul}
+\usepackage{xcolor}
+\usepackage[normalem]{ulem}
+\usepackage{caption}
+\usepackage{listings}
+\usepackage{subfig}
+\usepackage{mwe}
+
+\lstset{basicstyle=\small\ttfamily}
+
+\pagenumbering{arabic}   
+
+
+\title{PCD: Elaborato due}
+\author{Bachetti Michele, Marcantognini Elia, Tinti Angelo}
+\date{Aprile - Maggio 2022}
+
+\begin{document}
+
+% Line strike through color
+% \setstcolor{red}
+
+\maketitle
+
+\tableofcontents
+
+\chapter*{Introduzione}
+\addcontentsline{toc}{chapter}{Introduzione}
+
+L'elaborato presentato in questo report è composto di più parti:
+\begin{itemize}
+    \item nella prima parte, si implementa una versione asincrona del progetto realizzato nel \href{https://github.com/eliamarcantognini/pcd2122_ass1/blob/master/doc/report.pdf}{primo elaborato};
+    \item nella seconda parte, si ...;
+    \item nella terza parte, si ....
+\end{itemize}
+
+Per visualizzare il codice sono presenti i repository su GitHub:
+\begin{itemize}
+    \item \href{https://github.com/eliamarcantognini/pcd2122_ass1/tree/ass2-tasks}{Primo esercizio} alla pagina \url{https://github.com/eliamarcantognini/pcd2122_ass1/tree/ass2-tasks};
+    \item \href{https://github.com/eliamarcantognini/pcd2122_ass2es2}{Secondo esercizio} alla pagina \url{https://github.com/eliamarcantognini/pcd2122_ass2es2};
+    \item \href{https://github.com/eliamarcantognini/pcd2122_ass2es2}{Terzo esercizio} alla pagina \url{https://github.com/eliamarcantognini/pcd2122_ass2es2}.
+\end{itemize}
+
+
+\chapter{Primo esercizio} 
+\label{chapter:es1}
+\input{chapter_es1}
+
+\chapter{Secondo esercizio} 
+\label{chapter:es2}
+\input{chapter_es2}
+
+\chapter{Terzo esercizio} 
+\label{chapter:es3}
+\input{chapter_es3}
+
+
+\chapter*{Conclusioni}
+\addcontentsline{toc}{chapter}{Conclusioni}
+
+Conclusioni here.
+
+\end{document}
