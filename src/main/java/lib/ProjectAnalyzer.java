@@ -1,16 +1,17 @@
 package lib;
 
-import io.vertx.core.Future;
 import lib.reports.interfaces.ClassReport;
 import lib.reports.interfaces.InterfaceReport;
 import lib.reports.interfaces.PackageReport;
 import lib.reports.interfaces.ProjectReport;
 
+import java.util.concurrent.Future;
+
 /**
  * Interface of a project analyzer. It contains methods to get async
- * reports using {@link io.vertx.core.Future}
+ * reports using {@link java.util.concurrent.Future}
  *
- * @see io.vertx.core.Future
+ * @see java.util.concurrent.Future
  * @see InterfaceReport
  * @see ClassReport
  * @see PackageReport

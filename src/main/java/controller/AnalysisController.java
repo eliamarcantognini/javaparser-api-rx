@@ -1,12 +1,11 @@
 package controller;
 
-import io.vertx.core.Vertx;
 import lib.Logger;
 import lib.ProjectAnalyzer;
-import lib.async.AsyncProjectAnalyzer;
 import lib.dto.DTOParser;
 import lib.dto.PackageDTO;
 import lib.dto.ProjectDTO;
+import lib.rx.ReactiveProjectAnalyzer;
 import view.View;
 import view.utils.Strings;
 
@@ -16,7 +15,7 @@ import java.io.IOException;
 /**
  * Controller to manage application about project analysis
  *
- * @see AsyncProjectAnalyzer
+ * @see ProjectAnalyzer
  * @see lib.dto
  */
 public class AnalysisController {
@@ -30,8 +29,7 @@ public class AnalysisController {
      */
     private final static String VERTX_CHANNEL_TOPIC = "new_find";
 
-    private final ProjectAnalyzer projectAnalyzer;
-    private final Vertx vertx;
+    private ProjectAnalyzer projectAnalyzer;
     private ProjectDTO projectDTO;
     private View view;
     private String pathProjectToAnalyze;
@@ -40,8 +38,7 @@ public class AnalysisController {
      * Constructor of class
      */
     public AnalysisController() {
-        this.vertx = Vertx.vertx();
-        this.projectAnalyzer = new AsyncProjectAnalyzer(this.vertx);
+        this.projectAnalyzer = new ReactiveProjectAnalyzer();
     }
 
     /**
@@ -67,7 +64,6 @@ public class AnalysisController {
      */
     public void startAnalysisProject() {
         this.setViewBehaviourAtStarts();
-        this.initializeEventBus();
         this.projectAnalyzer.analyzeProject(this.pathProjectToAnalyze, AnalysisController.VERTX_CHANNEL_TOPIC);
     }
 
@@ -76,7 +72,6 @@ public class AnalysisController {
      */
     public void stopAnalysisProject() {
         this.view.setStopEnabled(false);
-        this.vertx.eventBus().publish(AnalysisController.VERTX_CHANNEL_TOPIC, Logger.STOP_ANALYZING_PROJECT);
     }
 
     /**
@@ -92,10 +87,6 @@ public class AnalysisController {
             this.view.showError(Strings.SOMETHING_WENT_WRONG, Strings.SAVE_ERROR);
         }
 
-    }
-
-    private void initializeEventBus() {
-        this.vertx.eventBus().consumer(AnalysisController.VERTX_CHANNEL_TOPIC, message -> this.manageMessage(message.body().toString()));
     }
 
     private void setViewBehaviourAtStarts() {
