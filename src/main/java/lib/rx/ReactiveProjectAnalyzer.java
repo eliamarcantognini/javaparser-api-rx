@@ -2,16 +2,21 @@ package lib.rx;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.subjects.PublishSubject;
 import lib.Logger;
 import lib.ProjectAnalyzer;
+import lib.reports.ClassReportImpl;
+import lib.reports.InterfaceReportImpl;
 import lib.reports.interfaces.ClassReport;
 import lib.reports.interfaces.InterfaceReport;
 import lib.reports.interfaces.PackageReport;
 import lib.reports.interfaces.ProjectReport;
+import lib.visitors.ClassesVisitor;
+import lib.visitors.InterfacesVisitor;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.concurrent.Future;
 
 public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
     /**
@@ -20,96 +25,92 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
      */
     public static final String CHANNEL_DEFAULT = "default";
 
-    private Logger logger;
+    private PublishSubject<ProjectReport> publishSubject;
+
+    private final Logger logger;
 
     /**
      * Constructor of class
      */
     public ReactiveProjectAnalyzer() {
+        this.logger = System.out::println;
     }
 
     @Override
-    public Future<InterfaceReport> getInterfaceReport(String srcInterfacePath) {
-//        return this.vertx.executeBlocking(ev -> {
-//            InterfacesVisitor interfaceVisitor = new InterfacesVisitor(logger);
-//            InterfaceReport interfaceReport = new InterfaceReportImpl();
-//            try {
-//                interfaceVisitor.visit(this.getCompilationUnit(srcInterfacePath), interfaceReport);
-//                logger.log(interfaceReport);
-//                ev.complete(interfaceReport);
-//            } catch (FileNotFoundException e) {
-//                ev.fail("EXCEPTION: getInterfaceReport has failed with message: " + e.getMessage());
-//            }
+    public Observable<InterfaceReport> getInterfaceReport(String srcInterfacePath) {
+        return Observable.create(emitter -> {
+            var visitor = new InterfacesVisitor(logger);
+            var report = new InterfaceReportImpl();
+            visitor.visit(this.getCompilationUnit(srcInterfacePath), report);
+//            logger.log(report);
+            emitter.onNext(report);
+            emitter.onComplete();
+        });
+    }
+
+    @Override
+    public Observable<ClassReport> getClassReport(String srcClassPath) {
+        return Observable.create(emitter -> {
+            var visitor = new ClassesVisitor(logger);
+            var report = new ClassReportImpl();
+            visitor.visit(this.getCompilationUnit(srcClassPath), report);
+//            logger.log(report);
+            emitter.onNext(report);
+            emitter.onComplete();
+        });
+    }
+
+    @Override
+    public Observable<PackageReport> getPackageReport(String srcPackagePath) {
+//        final List<Observable<InterfaceReport>> interfaces = new ArrayList<>();
+//        final List<Observable<ClassReport>> classes = new ArrayList<>();
+//
+//        return Observable.create(emitter -> {
+//            var packageReport = new PackageReportImpl();
+//            var folder = new File(srcPackagePath);
+//            var list = Stream.of(Objects.requireNonNull(
+//                            folder.listFiles((dir, name) -> name.endsWith(".java"))))
+//                    .map(File::getPath)
+//                    .toList();
+//            list.forEach(path -> {
+//                CompilationUnit cu;
+//                try {
+//                    cu = this.getCompilationUnit(path);
+//                    packageReport.setName("");
+//                    packageReport.setFullPath("");
+//                    if (cu.getType(0).asClassOrInterfaceDeclaration().isInterface()) {
+//                        interfaces.add(this.getInterfaceReport(path));
+//                    } else {
+//                        classes.add(this.getClassReport(path));
+//                    }
+//                } catch (FileNotFoundException e) {
+//                    e.printStackTrace();
+//                }
+//            });
+//            var interfaceObs = Observable.merge(interfaces);
+//            interfaceObs.subscribe(packageReport::addInterfaceReport);
+//            var classObs = Observable.merge(classes);
+//            classObs.subscribe(packageReport::addClassReport);
+//            var o = Observable.merge(interfaceObs, classObs).subscribe(onNext -> {
+//                System.out.println("sono qui");
+//                emitter.onNext(packageReport);
+//                emitter.onComplete();
+//            });
+//
 //        });
         return null;
     }
 
-    @Override
-    public Future<ClassReport> getClassReport(String srcClassPath) {
-//        return this.vertx.executeBlocking(ev -> {
-//            ClassesVisitor classVisitor = new ClassesVisitor(logger);
-//            ClassReport classReport = new ClassReportImpl();
-//            try {
-//                classVisitor.visit(this.getCompilationUnit(srcClassPath), classReport);
-//                logger.log(classReport);
-//                ev.complete(classReport);
-//            } catch (FileNotFoundException e) {
-//                ev.fail("EXCEPTION: getClassReport has failed with message: " + e.getMessage());
-//            }
-//        });
-        return null;
-    }
 
     @Override
-    public Future<PackageReport> getPackageReport(String srcPackagePath) {
-//        Promise<PackageReport> promise = new PromiseImpl<>();
-//        if (!new File(srcPackagePath).isDirectory()) {
-//            promise.fail("Package path is not a directory");
-//        } else {
-//            PackageVerticle vert = new PackageVerticle(this, promise, srcPackagePath, this.logger);
-//            this.vertx.deployVerticle(vert).onComplete(id -> this.verticleIDs.add(id.result()));
-//            promise.future().onFailure(res -> {
-//                if (!res.getMessage().equals(Logger.STOP_ANALYZING_PROJECT)) {
-//                    logger.logError(res.getMessage());
-//                }
-//            });
-//        }
-//        return promise.future();
-        return null;
-    }
+    public Observable<ProjectReport> getProjectReport(String srcProjectFolderPath) {
+        Observable<ProjectReport> obs;
 
-
-    @Override
-    public Future<ProjectReport> getProjectReport(String srcProjectFolderPath) {
-//        Promise<ProjectReport> promise = new PromiseImpl<>();
-//        if (!new File(srcProjectFolderPath).isDirectory()) {
-//            promise.fail("Package path is not a directory");
-//        } else {
-//            ProjectVerticle vert = new ProjectVerticle(this, promise, srcProjectFolderPath, this.logger);
-//            this.vertx.deployVerticle(vert).onComplete(id -> this.verticleIDs.add(id.result()));
-//            promise.future().onFailure(res -> {
-//                if (!res.getMessage().equals(Logger.STOP_ANALYZING_PROJECT)) {
-//                    logger.logError(res.getMessage());
-//                }
-//            });
-//        }
-//        return promise.future();
         return null;
     }
 
     @Override
     public void analyzeProject(String srcProjectFolderName, String topic) {
-//        this.vertx.eventBus().consumer(topic, m -> {
-//            if (m.body().toString().equals(Logger.STOP_ANALYZING_PROJECT)) this.stopLibrary();
-//        });
-//        this.logger = message -> vertx.eventBus().publish(topic, message);
-//        this.getProjectReport(srcProjectFolderName).onFailure(res -> {
-//            if (res.getMessage().equals(Logger.STOP_ANALYZING_PROJECT)) {
-//                logger.logInterrupt(res.getMessage());
-//            } else {
-//                logger.logError(res.getMessage());
-//            }
-//        });
     }
 
     private void stopLibrary() {
