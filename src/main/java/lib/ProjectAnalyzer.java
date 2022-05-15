@@ -1,17 +1,16 @@
 package lib;
 
+import io.reactivex.rxjava3.core.Observable;
 import lib.reports.interfaces.ClassReport;
 import lib.reports.interfaces.InterfaceReport;
 import lib.reports.interfaces.PackageReport;
 import lib.reports.interfaces.ProjectReport;
 
-import java.util.concurrent.Future;
-
 /**
  * Interface of a project analyzer. It contains methods to get async
  * reports using {@link java.util.concurrent.Future}
  *
- * @see java.util.concurrent.Future
+ * @see io.reactivex.rxjava3.core.Observable
  * @see InterfaceReport
  * @see ClassReport
  * @see PackageReport
@@ -26,7 +25,7 @@ public interface ProjectAnalyzer {
      * @param srcInterfacePath path to interface
      * @return InterfaceReport future
      */
-    Future<InterfaceReport> getInterfaceReport(String srcInterfacePath);
+    Observable<InterfaceReport> getInterfaceReport(String srcInterfacePath);
 
     /**
      * Async method to retrieve the report about a specific class,
@@ -35,7 +34,7 @@ public interface ProjectAnalyzer {
      * @param srcClassPath path to class
      * @return ClassReport future
      */
-    Future<ClassReport> getClassReport(String srcClassPath);
+    Observable<ClassReport> getClassReport(String srcClassPath);
 
     /**
      * Async method to retrieve the report about a package,
@@ -44,7 +43,7 @@ public interface ProjectAnalyzer {
      * @param srcPackagePath path to package
      * @return PackageReport future
      */
-    Future<PackageReport> getPackageReport(String srcPackagePath);
+    Observable<PackageReport> getPackageReport(String srcPackagePath);
 
     /**
      * Async method to retrieve the report about a project
@@ -53,7 +52,7 @@ public interface ProjectAnalyzer {
      * @param srcProjectFolderPath path to project
      * @return ProjectReport future
      */
-    Future<ProjectReport> getProjectReport(String srcProjectFolderPath);
+    Observable<ProjectReport> getProjectReport(String srcProjectFolderPath);
 
     /**
      * Async function that analyze a project given the full path of the project folder.
