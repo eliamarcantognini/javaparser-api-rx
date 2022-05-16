@@ -1,8 +1,10 @@
 package controller;
 
+import io.reactivex.rxjava3.core.Observable;
 import lib.Logger;
 import lib.ProjectAnalyzer;
 import lib.dto.DTOParser;
+import lib.dto.DTOs;
 import lib.dto.PackageDTO;
 import lib.dto.ProjectDTO;
 import lib.rx.ReactiveProjectAnalyzer;
@@ -27,19 +29,20 @@ public class AnalysisController {
     /**
      * Channel of vertx eventBus where analysis messages are exchanged
      */
-    private final static String VERTX_CHANNEL_TOPIC = "new_find";
+    private final static String CHANNEL_TOPIC = "new_find";
 
     private ProjectAnalyzer projectAnalyzer;
     private ProjectDTO projectDTO;
     private View view;
     private String pathProjectToAnalyze;
+    private Observable<ProjectDTO> projectReport;
 
     /**
      * Constructor of class
      */
-//    public AnalysisController() {
-//        this.projectAnalyzer = new ReactiveProjectAnalyzer(publishSubject);
-//    }
+    public AnalysisController() {
+        this.projectAnalyzer = new ReactiveProjectAnalyzer();
+    }
 
     /**
      * Set the view where display analysis results
@@ -64,7 +67,13 @@ public class AnalysisController {
      */
     public void startAnalysisProject() {
         this.setViewBehaviourAtStarts();
-        this.projectAnalyzer.analyzeProject(this.pathProjectToAnalyze, AnalysisController.VERTX_CHANNEL_TOPIC);
+        projectReport = this.projectAnalyzer.analyzeProject(this.pathProjectToAnalyze, AnalysisController.CHANNEL_TOPIC);
+        projectReport.subscribe(result -> {
+            this.projectDTO = result;
+            this.view.renderTree(projectDTO);
+            this.view.printText(DTOParser.parseString(result));
+            this.saveProjectReportToFile();
+        });
     }
 
     /**

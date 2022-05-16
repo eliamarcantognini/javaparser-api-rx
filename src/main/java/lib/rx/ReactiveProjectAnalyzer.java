@@ -5,8 +5,8 @@ import com.github.javaparser.ast.CompilationUnit;
 import io.reactivex.rxjava3.core.Observable;
 import lib.Logger;
 import lib.ProjectAnalyzer;
-import lib.dto.DTOParser;
 import lib.dto.DTOs;
+import lib.dto.ProjectDTO;
 import lib.reports.ClassReportImpl;
 import lib.reports.InterfaceReportImpl;
 import lib.reports.PackageReportImpl;
@@ -20,9 +20,8 @@ import lib.visitors.InterfacesVisitor;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
@@ -44,13 +43,6 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
 
     @Override
     public Observable<InterfaceReport> getInterfaceReport(String srcInterfacePath) {
-//        return Observable.create(emitter -> {
-//            var visitor = new InterfacesVisitor(logger);
-//            var report = new InterfaceReportImpl();
-//            visitor.visit(this.getCompilationUnit(srcInterfacePath), report);
-//            emitter.onNext(report);
-//            emitter.onComplete();
-//        });
         return Observable.fromCallable(() -> {
            var report = new InterfaceReportImpl();
            new InterfacesVisitor(logger).visit(this.getCompilationUnit(srcInterfacePath), report);
@@ -60,13 +52,6 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
 
     @Override
     public Observable<ClassReport> getClassReport(String srcClassPath) {
-//        return Observable.create(emitter -> {
-//            var visitor = new ClassesVisitor(logger);
-//            var report = new ClassReportImpl();
-//            visitor.visit(this.getCompilationUnit(srcClassPath), report);
-//            emitter.onNext(report);
-//            emitter.onComplete();
-//        });
         return Observable.fromCallable(() -> {
             var report = new ClassReportImpl();
             new ClassesVisitor(logger).visit(this.getCompilationUnit(srcClassPath), report);
@@ -76,11 +61,9 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
 
     @Override
     public Observable<PackageReport> getPackageReport(String srcPackagePath) {
-        final List<Observable<InterfaceReport>> interfaces = new ArrayList<>();
-        final List<Observable<ClassReport>> classes = new ArrayList<>();
-
         return Observable.fromCallable(() -> {
             var packageReport = new PackageReportImpl();
+            var set = new AtomicBoolean(false);
             var folder = new File(srcPackagePath);
             var list = Stream.of(Objects.requireNonNull(folder.listFiles((dir, name) -> name.endsWith(".java")))).map(File::getPath).toList();
             list.forEach(path -> {
@@ -90,9 +73,15 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
                     packageReport.setName("");
                     packageReport.setFullPath("");
                     if (cu.getType(0).asClassOrInterfaceDeclaration().isInterface()) {
-                        getInterfaceReport(path).subscribe(packageReport::addInterfaceReport);
+                        getInterfaceReport(path).subscribe(report -> {
+                            setPackageNameAndPath(packageReport, set, report.getName(), report.getSourceFullPath());
+                            packageReport.addInterfaceReport(report);
+                        });
                     } else {
-                        getClassReport(path).subscribe(packageReport::addClassReport);
+                        getClassReport(path).subscribe(report -> {
+                            setPackageNameAndPath(packageReport, set, report.getName(), report.getSourceFullPath());
+                            packageReport.addClassReport(report);
+                        });
                     }
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
@@ -112,23 +101,28 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
 
             var list = Stream.concat(Stream.of(folder.toString()), Stream.of(Objects.requireNonNull(folder.listFiles())).filter(File::isDirectory).map(File::getPath)).toList();
             list.forEach(path -> {
-                getPackageReport(path).subscribe(projectReport::addPackageReport);
+                getPackageReport(path).subscribe(packageReport -> {
+                   packageReport.getClassesReports().forEach(c -> c.getMethodsInfo().forEach(m -> {if (m.getName().equals("main")) projectReport.setMainClass(c);}));
+                   projectReport.addPackageReport(packageReport);
+                });
             });
-            projectReport.setMainClass(new ClassReportImpl());
             return projectReport;
         });
 
     }
 
     @Override
-    public Observable<String> analyzeProject(String srcProjectFolderName, String topic) {
+    public Observable<ProjectDTO> analyzeProject(String srcProjectFolderName, String topic) {
         return Observable.fromCallable(() -> {
-            final String[] res = {""};
+            final ProjectDTO[] res = {DTOs.createProjectDTO(new ProjectReportImpl())};
             getProjectReport(srcProjectFolderName).subscribe(e -> {
-                res[0] = DTOParser.parseString(DTOs.createProjectDTO(e));
+                res[0] = DTOs.createProjectDTO(e);
             });
             return res[0];
         });
+
+
+//        return null;
     }
 
     private void stopLibrary() {
@@ -143,5 +137,15 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
      */
     CompilationUnit getCompilationUnit(String path) throws FileNotFoundException {
         return StaticJavaParser.parse(new File(path));
+    }
+
+    private void setPackageNameAndPath(PackageReport packageReport, AtomicBoolean set, String name, String sourceFullPath) {
+        if (!set.get()) {
+            System.out.println("SONO QUI!!! " + name + " --- " + sourceFullPath);
+            var s = sourceFullPath.split("\\.");
+            packageReport.setName(s.length == 1 ? "." : (s[s.length - 2]));
+            packageReport.setFullPath(s.length == 1 ? "" : sourceFullPath.substring(0, sourceFullPath.length() - name.length() - 1));
+            set.set(true);
+        }
     }
 }

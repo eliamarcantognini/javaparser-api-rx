@@ -16,19 +16,18 @@ public class TestProjectAnalyzer {
 //        testClassReport(projectAnalyzer, CLASS);
 //        testInterfaceReport(projectAnalyzer, INTERFACE);
 //        testPackageReport(projectAnalyzer, PACKAGE);
-        var ps = projectAnalyzer.analyzeProject(PACKAGE, "default");
-        ps.subscribe(System.out::println);
+        testProjectReport(projectAnalyzer, PROJECT);
+//        var ps = projectAnalyzer.analyzeProject(PACKAGE, "default");
+//        ps.subscribe(System.out::println);
 
     }
 
     private static void testInterfaceReport(ProjectAnalyzer projectAnalyzer, final String interfaceToAnalyze) {
         projectAnalyzer.getInterfaceReport(interfaceToAnalyze).subscribe(e -> System.out.println(e.toString()));
-//        projectAnalyzer.getInterfaceReport(interfaceToAnalyze).subscribe();
     }
 
     private static void testClassReport(ProjectAnalyzer projectAnalyzer, final String classToAnalyze) {
         projectAnalyzer.getClassReport(classToAnalyze).subscribe(e -> System.out.println(e.toString()));
-//        projectAnalyzer.getClassReport(classToAnalyze).subscribe();
     }
 
     private static void testPackageReport(ProjectAnalyzer projectAnalyzer, final String packageToAnalyze) {
@@ -36,6 +35,7 @@ public class TestProjectAnalyzer {
     }
 
     public static void testProjectReport(ProjectAnalyzer projectAnalyzer, final String projectToAnalyze) {
+        projectAnalyzer.getProjectReport(projectToAnalyze).subscribe(o -> System.out.println("\n\nSSSS: " + o.toString() + "\n"));
     }
 
     private static <T> void futureOnFailureOnComplete(Future<T> future) {
