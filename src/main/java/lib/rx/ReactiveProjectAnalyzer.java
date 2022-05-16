@@ -38,7 +38,7 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
      * Constructor of class
      */
     public ReactiveProjectAnalyzer(Observer<String> observer) {
-        this.logger = message -> observer.onNext(message);
+        this.logger = observer::onNext;
     }
 
     @Override
@@ -46,6 +46,7 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
         return Observable.fromCallable(() -> {
            var report = new InterfaceReportImpl();
            new InterfacesVisitor(logger).visit(this.getCompilationUnit(srcInterfacePath), report);
+           logger.log(Logger.CodeElementFound.INTERFACE + " analyzed: "  + report.getName() + " @ " + report.getSourceFullPath());
            return report;
         });
     }
@@ -55,6 +56,7 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
         return Observable.fromCallable(() -> {
             var report = new ClassReportImpl();
             new ClassesVisitor(logger).visit(this.getCompilationUnit(srcClassPath), report);
+            logger.log(Logger.CodeElementFound.CLASS + " analyzed: "  + report.getName() + " @ " + report.getSourceFullPath());
             return report;
         });
     }
@@ -88,6 +90,7 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
                     e.printStackTrace();
                 }
             });
+            logger.log(Logger.CodeElementFound.PACKAGE + " analyzed: " + packageReport.getName());
             return packageReport;
         });
 
@@ -105,18 +108,14 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
                             .filter(File::isDirectory)
                             .map(File::getPath))
                     .toList();
-            list.forEach(path -> {
-                getPackageReport(path).subscribe(packageReport -> {
-                   packageReport.getClassesReports()
-                           .forEach(c -> c.getMethodsInfo()
-                                   .forEach(m -> {
-                                       if (m.getName().equals("main")) {
-                                           projectReport.setMainClass(c);
-                                       }
-                                   }));
-                   projectReport.addPackageReport(packageReport);
-                });
-            });
+            list.forEach(path -> getPackageReport(path).subscribe(packageReport -> {
+               packageReport.getClassesReports()
+                       .forEach(c -> c.getMethodsInfo()
+                               .forEach(m -> {
+                                   if (m.getName().equals("main")) projectReport.setMainClass(c);
+                               }));
+               projectReport.addPackageReport(packageReport);
+            }));
             return projectReport;
         });
 
@@ -126,9 +125,7 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
     public Observable<ProjectDTO> analyzeProject(String srcProjectFolderName, String topic) {
         return Observable.fromCallable(() -> {
             final ProjectDTO[] res = {DTOs.createProjectDTO(new ProjectReportImpl())};
-            getProjectReport(srcProjectFolderName).subscribe(e -> {
-                res[0] = DTOs.createProjectDTO(e);
-            });
+            getProjectReport(srcProjectFolderName).subscribe(e -> res[0] = DTOs.createProjectDTO(e));
             return res[0];
         });
 
