@@ -37,9 +37,9 @@ public class AnalysisController {
     /**
      * Constructor of class
      */
-    public AnalysisController() {
-        this.projectAnalyzer = new ReactiveProjectAnalyzer();
-    }
+//    public AnalysisController() {
+//        this.projectAnalyzer = new ReactiveProjectAnalyzer(publishSubject);
+//    }
 
     /**
      * Set the view where display analysis results

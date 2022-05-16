@@ -9,21 +9,26 @@ public class TestProjectAnalyzer {
     private final static String INTERFACE = "src/main/java/lib/reports/interfaces/ClassReport.java";
     private final static String CLASS = "src/main/java/controller/AnalysisController.java";
     private final static String PACKAGE = "src/main/java/lib/reports/";
-    private final static String PROJECT = "";
+    private final static String PROJECT = "src/main/java/";
 
     public static void main(String[] args) {
         ProjectAnalyzer projectAnalyzer = new ReactiveProjectAnalyzer();
 //        testClassReport(projectAnalyzer, CLASS);
 //        testInterfaceReport(projectAnalyzer, INTERFACE);
-        testPackageReport(projectAnalyzer, PACKAGE);
+//        testPackageReport(projectAnalyzer, PACKAGE);
+        var ps = projectAnalyzer.analyzeProject(PACKAGE, "default");
+        ps.subscribe(System.out::println);
+
     }
 
     private static void testInterfaceReport(ProjectAnalyzer projectAnalyzer, final String interfaceToAnalyze) {
         projectAnalyzer.getInterfaceReport(interfaceToAnalyze).subscribe(e -> System.out.println(e.toString()));
+//        projectAnalyzer.getInterfaceReport(interfaceToAnalyze).subscribe();
     }
 
     private static void testClassReport(ProjectAnalyzer projectAnalyzer, final String classToAnalyze) {
         projectAnalyzer.getClassReport(classToAnalyze).subscribe(e -> System.out.println(e.toString()));
+//        projectAnalyzer.getClassReport(classToAnalyze).subscribe();
     }
 
     private static void testPackageReport(ProjectAnalyzer projectAnalyzer, final String packageToAnalyze) {
