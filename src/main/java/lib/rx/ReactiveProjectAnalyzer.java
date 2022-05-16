@@ -36,9 +36,8 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
     /**
      * Constructor of class
      */
-    public ReactiveProjectAnalyzer() {
-        this.logger = message -> System.out.println("Logger: " + message);
-
+    public ReactiveProjectAnalyzer(Observer<String> observer) {
+        this.logger = message -> observer.onNext(message);
     }
 
     @Override
