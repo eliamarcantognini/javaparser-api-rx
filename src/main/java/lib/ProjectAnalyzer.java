@@ -1,6 +1,7 @@
 package lib;
 
 import io.reactivex.rxjava3.core.Observable;
+import lib.dto.ProjectDTO;
 import lib.reports.interfaces.ClassReport;
 import lib.reports.interfaces.InterfaceReport;
 import lib.reports.interfaces.PackageReport;
@@ -61,5 +62,5 @@ public interface ProjectAnalyzer {
      * @param topic                topic where analysis results messages where sent
      * @return
      */
-    Observable<ProjectReport> analyzeProject(String srcProjectFolderName, String topic);
+    Observable<ProjectDTO> analyzeProject(String srcProjectFolderName, String topic);
 }
