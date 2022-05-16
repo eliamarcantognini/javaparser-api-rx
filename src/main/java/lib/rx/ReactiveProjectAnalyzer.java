@@ -3,9 +3,11 @@ package lib.rx;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Observer;
 import lib.Logger;
 import lib.ProjectAnalyzer;
 import lib.dto.DTOs;
+import lib.dto.ProjectDTO;
 import lib.reports.ClassReportImpl;
 import lib.reports.InterfaceReportImpl;
 import lib.reports.PackageReportImpl;
@@ -35,9 +37,8 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
     /**
      * Constructor of class
      */
-    public ReactiveProjectAnalyzer() {
-        this.logger = message -> System.out.println("Logger: " + message);
-
+    public ReactiveProjectAnalyzer(Observer<String> observer) {
+        this.logger = observer::onNext;
     }
 
     @Override
@@ -45,6 +46,7 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
         return Observable.fromCallable(() -> {
            var report = new InterfaceReportImpl();
            new InterfacesVisitor(logger).visit(this.getCompilationUnit(srcInterfacePath), report);
+           logger.log(Logger.CodeElementFound.INTERFACE + " analyzed: "  + report.getName() + " @ " + report.getSourceFullPath());
            return report;
         });
     }
@@ -54,6 +56,7 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
         return Observable.fromCallable(() -> {
             var report = new ClassReportImpl();
             new ClassesVisitor(logger).visit(this.getCompilationUnit(srcClassPath), report);
+            logger.log(Logger.CodeElementFound.CLASS + " analyzed: "  + report.getName() + " @ " + report.getSourceFullPath());
             return report;
         });
     }
@@ -64,7 +67,10 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
             var packageReport = new PackageReportImpl();
             var set = new AtomicBoolean(false);
             var folder = new File(srcPackagePath);
-            var list = Stream.of(Objects.requireNonNull(folder.listFiles((dir, name) -> name.endsWith(".java")))).map(File::getPath).toList();
+            var list = Stream
+                    .of(Objects.requireNonNull(folder.listFiles((dir, name) -> name.endsWith(".java"))))
+                    .map(File::getPath)
+                    .toList();
             list.forEach(path -> {
                 CompilationUnit cu;
                 try {
@@ -84,6 +90,7 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
                     e.printStackTrace();
                 }
             });
+            logger.log(Logger.CodeElementFound.PACKAGE + " analyzed: " + packageReport.getName());
             return packageReport;
         });
 
@@ -96,21 +103,32 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
             var projectReport = new ProjectReportImpl();
             final File folder = new File(srcProjectFolderPath);
 
-            var list = Stream.concat(Stream.of(folder.toString()), Stream.of(Objects.requireNonNull(folder.listFiles())).filter(File::isDirectory).map(File::getPath)).toList();
-            list.forEach(path -> {
-                getPackageReport(path).subscribe(packageReport -> {
-                   packageReport.getClassesReports().forEach(c -> c.getMethodsInfo().forEach(m -> {if (m.getName().equals("main")) projectReport.setMainClass(c);}));
-                   projectReport.addPackageReport(packageReport);
-                });
-            });
+            var list = Stream
+                    .concat(Stream.of(folder.toString()), Stream.of(Objects.requireNonNull(folder.listFiles()))
+                            .filter(File::isDirectory)
+                            .map(File::getPath))
+                    .toList();
+            list.forEach(path -> getPackageReport(path).subscribe(packageReport -> {
+               packageReport.getClassesReports()
+                       .forEach(c -> c.getMethodsInfo()
+                               .forEach(m -> {
+                                   if (m.getName().equals("main")) projectReport.setMainClass(c);
+                               }));
+               projectReport.addPackageReport(packageReport);
+            }));
             return projectReport;
         });
 
     }
 
     @Override
-    public Observable<ProjectReport> analyzeProject(String srcProjectFolderName, String topic) {
-        return getProjectReport(srcProjectFolderName);
+    public Observable<ProjectDTO> analyzeProject(String srcProjectFolderName, String topic) {
+        return Observable.fromCallable(() -> {
+            final ProjectDTO[] res = {DTOs.createProjectDTO(new ProjectReportImpl())};
+            getProjectReport(srcProjectFolderName).subscribe(e -> res[0] = DTOs.createProjectDTO(e));
+            return res[0];
+        });
+
     }
 
     private void stopLibrary() {

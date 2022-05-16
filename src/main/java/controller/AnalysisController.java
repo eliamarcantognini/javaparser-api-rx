@@ -1,6 +1,10 @@
 package controller;
 
+import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Observer;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.observers.DefaultObserver;
 import lib.Logger;
 import lib.ProjectAnalyzer;
 import lib.dto.DTOParser;
@@ -32,17 +36,23 @@ public class AnalysisController {
      */
     private final static String CHANNEL_TOPIC = "new_find";
 
-    private ProjectAnalyzer projectAnalyzer;
+    private final ProjectAnalyzer projectAnalyzer;
     private ProjectDTO projectDTO;
     private View view;
     private String pathProjectToAnalyze;
-    private Observable<ProjectReport> projectReport;
 
     /**
      * Constructor of class
      */
     public AnalysisController() {
-        this.projectAnalyzer = new ReactiveProjectAnalyzer();
+        Observer<String> observer = new Observer<>() {
+            public void onSubscribe(@NonNull Disposable d){}
+            @Override
+            public void onNext(@NonNull String s) { view.printText(s); }
+            public void onError(@NonNull Throwable e) {}
+            public void onComplete() {}
+        };
+        this.projectAnalyzer = new ReactiveProjectAnalyzer(observer);
     }
 
     /**
@@ -68,11 +78,11 @@ public class AnalysisController {
      */
     public void startAnalysisProject() {
         this.setViewBehaviourAtStarts();
-        projectReport = this.projectAnalyzer.analyzeProject(this.pathProjectToAnalyze, AnalysisController.CHANNEL_TOPIC);
+        Observable<ProjectDTO> projectReport = this.projectAnalyzer.analyzeProject(this.pathProjectToAnalyze, AnalysisController.CHANNEL_TOPIC);
         projectReport.subscribe(result -> {
-            this.projectDTO = DTOs.createProjectDTO(result);
+            this.projectDTO = result;
             this.view.renderTree(projectDTO);
-            this.view.printText(DTOParser.parseString(result));
+            this.view.printText("PROJECT ANALYZE DONE.");
             this.saveProjectReportToFile();
         });
     }
