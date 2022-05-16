@@ -70,8 +70,6 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
                 CompilationUnit cu;
                 try {
                     cu = this.getCompilationUnit(path);
-                    packageReport.setName("");
-                    packageReport.setFullPath("");
                     if (cu.getType(0).asClassOrInterfaceDeclaration().isInterface()) {
                         getInterfaceReport(path).subscribe(report -> {
                             setPackageNameAndPath(packageReport, set, report.getName(), report.getSourceFullPath());
@@ -141,7 +139,6 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
 
     private void setPackageNameAndPath(PackageReport packageReport, AtomicBoolean set, String name, String sourceFullPath) {
         if (!set.get()) {
-            System.out.println("SONO QUI!!! " + name + " --- " + sourceFullPath);
             var s = sourceFullPath.split("\\.");
             packageReport.setName(s.length == 1 ? "." : (s[s.length - 2]));
             packageReport.setFullPath(s.length == 1 ? "" : sourceFullPath.substring(0, sourceFullPath.length() - name.length() - 1));
