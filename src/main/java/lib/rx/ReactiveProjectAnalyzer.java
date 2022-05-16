@@ -3,6 +3,7 @@ package lib.rx;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Observer;
 import lib.Logger;
 import lib.ProjectAnalyzer;
 import lib.dto.DTOs;
