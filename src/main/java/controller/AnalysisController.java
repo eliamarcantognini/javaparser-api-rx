@@ -67,7 +67,7 @@ public class AnalysisController {
 
             }
         };
-        this.projectAnalyzer = new ReactiveProjectAnalyzer(Observable.empty(), observer);
+        this.projectAnalyzer = new ReactiveProjectAnalyzer(observer);
     }
 
     /**
