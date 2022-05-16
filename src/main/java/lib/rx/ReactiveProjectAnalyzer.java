@@ -6,6 +6,7 @@ import io.reactivex.rxjava3.core.Observable;
 import lib.Logger;
 import lib.ProjectAnalyzer;
 import lib.dto.DTOs;
+import lib.dto.ProjectDTO;
 import lib.reports.ClassReportImpl;
 import lib.reports.InterfaceReportImpl;
 import lib.reports.PackageReportImpl;
@@ -109,8 +110,15 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
     }
 
     @Override
-    public Observable<ProjectReport> analyzeProject(String srcProjectFolderName, String topic) {
-        return getProjectReport(srcProjectFolderName);
+    public Observable<ProjectDTO> analyzeProject(String srcProjectFolderName, String topic) {
+        return Observable.fromCallable(() -> {
+            final ProjectDTO[] res = {DTOs.createProjectDTO(new ProjectReportImpl())};
+            getProjectReport(srcProjectFolderName).subscribe(e -> {
+                res[0] = DTOs.createProjectDTO(e);
+            });
+            return res[0];
+        });
+
     }
 
     private void stopLibrary() {

@@ -1,6 +1,10 @@
 package controller;
 
+import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Observer;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.observers.DefaultObserver;
 import lib.Logger;
 import lib.ProjectAnalyzer;
 import lib.dto.DTOParser;
@@ -36,13 +40,34 @@ public class AnalysisController {
     private ProjectDTO projectDTO;
     private View view;
     private String pathProjectToAnalyze;
-    private Observable<ProjectReport> projectReport;
+    private Observable<ProjectDTO> projectReport;
 
     /**
      * Constructor of class
      */
     public AnalysisController() {
-        this.projectAnalyzer = new ReactiveProjectAnalyzer();
+        Observer<String> observer = new Observer<String>() {
+            @Override
+            public void onSubscribe(@NonNull Disposable d) {
+                System.out.println("OBS SUB");
+            }
+
+            @Override
+            public void onNext(@NonNull String s) {
+                System.out.println("OBS:" + s);
+            }
+
+            @Override
+            public void onError(@NonNull Throwable e) {
+
+            }
+
+            @Override
+            public void onComplete() {
+
+            }
+        };
+        this.projectAnalyzer = new ReactiveProjectAnalyzer(Observable.empty(), observer);
     }
 
     /**
@@ -70,7 +95,7 @@ public class AnalysisController {
         this.setViewBehaviourAtStarts();
         projectReport = this.projectAnalyzer.analyzeProject(this.pathProjectToAnalyze, AnalysisController.CHANNEL_TOPIC);
         projectReport.subscribe(result -> {
-            this.projectDTO = DTOs.createProjectDTO(result);
+            this.projectDTO = result;
             this.view.renderTree(projectDTO);
             this.view.printText(DTOParser.parseString(result));
             this.saveProjectReportToFile();
