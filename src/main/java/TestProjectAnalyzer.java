@@ -12,7 +12,29 @@ public class TestProjectAnalyzer {
     private final static String PROJECT = "src/main/java/";
 
     public static void main(String[] args) {
-        ProjectAnalyzer projectAnalyzer = new ReactiveProjectAnalyzer();
+        Observer<String> observer = new Observer<String>() {
+            @Override
+            public void onSubscribe(@NonNull Disposable d) {
+                System.out.println("OBS SUB");
+            }
+
+            @Override
+            public void onNext(@NonNull String s) {
+                System.out.println("OBS:" + s);
+            }
+
+            @Override
+            public void onError(@NonNull Throwable e) {
+                System.out.println(e.toString());
+            }
+
+            @Override
+            public void onComplete() {
+
+            }
+        };
+        var projectAnalyzer = new ReactiveProjectAnalyzer(observer);
+
 //        testClassReport(projectAnalyzer, CLASS);
 //        testInterfaceReport(projectAnalyzer, INTERFACE);
 //        testPackageReport(projectAnalyzer, PACKAGE);
