@@ -65,7 +65,10 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
             var packageReport = new PackageReportImpl();
             var set = new AtomicBoolean(false);
             var folder = new File(srcPackagePath);
-            var list = Stream.of(Objects.requireNonNull(folder.listFiles((dir, name) -> name.endsWith(".java")))).map(File::getPath).toList();
+            var list = Stream
+                    .of(Objects.requireNonNull(folder.listFiles((dir, name) -> name.endsWith(".java"))))
+                    .map(File::getPath)
+                    .toList();
             list.forEach(path -> {
                 CompilationUnit cu;
                 try {
@@ -97,10 +100,20 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
             var projectReport = new ProjectReportImpl();
             final File folder = new File(srcProjectFolderPath);
 
-            var list = Stream.concat(Stream.of(folder.toString()), Stream.of(Objects.requireNonNull(folder.listFiles())).filter(File::isDirectory).map(File::getPath)).toList();
+            var list = Stream
+                    .concat(Stream.of(folder.toString()), Stream.of(Objects.requireNonNull(folder.listFiles()))
+                            .filter(File::isDirectory)
+                            .map(File::getPath))
+                    .toList();
             list.forEach(path -> {
                 getPackageReport(path).subscribe(packageReport -> {
-                   packageReport.getClassesReports().forEach(c -> c.getMethodsInfo().forEach(m -> {if (m.getName().equals("main")) projectReport.setMainClass(c);}));
+                   packageReport.getClassesReports()
+                           .forEach(c -> c.getMethodsInfo()
+                                   .forEach(m -> {
+                                       if (m.getName().equals("main")) {
+                                           projectReport.setMainClass(c);
+                                       }
+                                   }));
                    projectReport.addPackageReport(packageReport);
                 });
             });
