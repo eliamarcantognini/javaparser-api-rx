@@ -7,6 +7,7 @@ import lib.dto.DTOParser;
 import lib.dto.DTOs;
 import lib.dto.PackageDTO;
 import lib.dto.ProjectDTO;
+import lib.reports.interfaces.ProjectReport;
 import lib.rx.ReactiveProjectAnalyzer;
 import view.View;
 import view.utils.Strings;
@@ -35,7 +36,7 @@ public class AnalysisController {
     private ProjectDTO projectDTO;
     private View view;
     private String pathProjectToAnalyze;
-    private Observable<ProjectDTO> projectReport;
+    private Observable<ProjectReport> projectReport;
 
     /**
      * Constructor of class
@@ -69,7 +70,7 @@ public class AnalysisController {
         this.setViewBehaviourAtStarts();
         projectReport = this.projectAnalyzer.analyzeProject(this.pathProjectToAnalyze, AnalysisController.CHANNEL_TOPIC);
         projectReport.subscribe(result -> {
-            this.projectDTO = result;
+            this.projectDTO = DTOs.createProjectDTO(result);
             this.view.renderTree(projectDTO);
             this.view.printText(DTOParser.parseString(result));
             this.saveProjectReportToFile();
