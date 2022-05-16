@@ -57,9 +57,9 @@ public interface ProjectAnalyzer {
     /**
      * Async function that analyze a project given the full path of the project folder.
      * Real time result were sent in topic specified.
-     *
-     * @param srcProjectFolderName path to project
+     *  @param srcProjectFolderName path to project
      * @param topic                topic where analysis results messages where sent
+     * @return
      */
-    void analyzeProject(String srcProjectFolderName, String topic);
+    Observable<ProjectReport> analyzeProject(String srcProjectFolderName, String topic);
 }
