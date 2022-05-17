@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
@@ -72,38 +73,33 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
     }
 
     @Override
-    public Observable<PackageReport> getPackageReport(String srcPackagePath) {
-        return Observable.fromCallable(() -> {
+    public Observable<PackageReport> getPackageReport(String... srcPackagePath) {
+        return Observable.fromStream(Stream.of(srcPackagePath).map((path) -> {
             var packageReport = new PackageReportImpl();
-            var set = new AtomicBoolean(false);
-            var folder = new File(srcPackagePath);
-            var list = Stream
-                    .of(Objects.requireNonNull(folder.listFiles((dir, name) -> name.endsWith(".java"))))
+            //TODO controllare per bene se si può settare il nome del package da qui
+            var s = path.split("/");
+            packageReport.setName(s[s.length-1]);
+            packageReport.setFullPath(path.replaceAll("/", "."));
+//                    var set = new AtomicBoolean(false);
+            var folder = new File(path);
+            Stream.of(Objects.requireNonNull(folder.listFiles((dir, name) -> name.endsWith(".java"))))
                     .map(File::getPath)
-                    .toList();
-            list.forEach(path -> {
-                CompilationUnit cu;
-                try {
-                    cu = this.getCompilationUnit(path);
-                    if (cu.getType(0).asClassOrInterfaceDeclaration().isInterface()) {
-                        getInterfaceReport(path).subscribe(report -> {
-                            setPackageNameAndPath(packageReport, set, report.getName(), report.getSourceFullPath());
-                            packageReport.addInterfaceReport(report);
-                        });
-                    } else {
-                        getClassReport(path).subscribe(report -> {
-                            setPackageNameAndPath(packageReport, set, report.getName(), report.getSourceFullPath());
-                            packageReport.addClassReport(report);
-                        });
-                    }
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
-            });
+                    .collect(Collectors.groupingBy(elem -> {
+                        try {
+                            return this.getCompilationUnit(elem).getType(0).asClassOrInterfaceDeclaration().isInterface();
+                        } catch (FileNotFoundException e) {
+                            throw new RuntimeException(e);
+                        }
+                    })).forEach((isInterface, list) -> {
+                        if (isInterface) {
+                            getInterfaceReport(list.toArray(new String[0])).subscribe(packageReport::addInterfaceReport);
+                        } else {
+                            getClassReport(list.toArray(new String[0])).subscribe(packageReport::addClassReport);
+                        }
+                    });
             logger.log(Logger.CodeElementFound.PACKAGE + " analyzed: " + packageReport.getName());
             return packageReport;
-        });
-
+        }));
     }
 
 
