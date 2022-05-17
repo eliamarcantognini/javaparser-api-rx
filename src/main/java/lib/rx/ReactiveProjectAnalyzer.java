@@ -44,7 +44,6 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
 
     @Override
     public Observable<InterfaceReport> getInterfaceReport(String... srcInterfacePath) {
-
         return Observable.fromStream(Stream.of(srcInterfacePath).map(path -> {
             var report = new InterfaceReportImpl();
             try {
