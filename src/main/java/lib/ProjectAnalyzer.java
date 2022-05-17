@@ -26,7 +26,7 @@ public interface ProjectAnalyzer {
      * @param srcInterfacePath path to interface
      * @return InterfaceReport future
      */
-    Observable<InterfaceReport> getInterfaceReport(String srcInterfacePath);
+    Observable<InterfaceReport> getInterfaceReport(String... srcInterfacePath);
 
     /**
      * Async method to retrieve the report about a specific class,

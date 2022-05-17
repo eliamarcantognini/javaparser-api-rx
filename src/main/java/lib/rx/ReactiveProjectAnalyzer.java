@@ -42,13 +42,19 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
     }
 
     @Override
-    public Observable<InterfaceReport> getInterfaceReport(String srcInterfacePath) {
-        return Observable.fromCallable(() -> {
-           var report = new InterfaceReportImpl();
-           new InterfacesVisitor(logger).visit(this.getCompilationUnit(srcInterfacePath), report);
-           logger.log(Logger.CodeElementFound.INTERFACE + " analyzed: "  + report.getName() + " @ " + report.getSourceFullPath());
-           return report;
-        });
+    public Observable<InterfaceReport> getInterfaceReport(String... srcInterfacePath) {
+
+        return Observable.fromStream(Stream.of(srcInterfacePath).map(path -> {
+            var report = new InterfaceReportImpl();
+            try {
+                new InterfacesVisitor(logger).visit(this.getCompilationUnit(path), report);
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+            logger.log(Logger.CodeElementFound.INTERFACE + " analyzed: "  + report.getName() + " @ " + report.getSourceFullPath());
+            return report;
+        }));
+
     }
 
     @Override
