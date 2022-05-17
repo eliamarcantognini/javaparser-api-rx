@@ -69,7 +69,7 @@ public class PackageReportImpl implements PackageReport {
 
     @Override
     public String toString() {
-        return "ClassReport:\n"
+        return "PackageReport:\n"
                 + "\tPackage Name: " + this.getName() + "\n"
                 + "\tSource Full File Name: " + this.getSourceFullPath() + "\n"
                 + "\tClass Reports: \n" + this.classReports.toString() + "\n"
