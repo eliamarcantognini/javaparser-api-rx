@@ -40,6 +40,7 @@ public class AnalysisController {
     private ProjectDTO projectDTO;
     private View view;
     private String pathProjectToAnalyze;
+    private Disposable projectDisposable;
 
     /**
      * Constructor of class
@@ -78,12 +79,13 @@ public class AnalysisController {
      */
     public void startAnalysisProject() {
         this.setViewBehaviourAtStarts();
-        Observable<ProjectDTO> projectReport = this.projectAnalyzer.analyzeProject(this.pathProjectToAnalyze, AnalysisController.CHANNEL_TOPIC);
-        projectReport.subscribe(result -> {
+        Observable<ProjectDTO> projectObservable = this.projectAnalyzer.analyzeProject(this.pathProjectToAnalyze, AnalysisController.CHANNEL_TOPIC);
+        projectDisposable = projectObservable.subscribe(result -> {
             this.projectDTO = result;
+            this.view.setStopEnabled(false);
+            this.view.setSaveEnabled(true);
             this.view.renderTree(projectDTO);
             this.view.printText("PROJECT ANALYZE DONE.");
-            this.saveProjectReportToFile();
         });
     }
 
@@ -92,6 +94,8 @@ public class AnalysisController {
      */
     public void stopAnalysisProject() {
         this.view.setStopEnabled(false);
+        this.view.setSaveEnabled(false);
+        projectDisposable.dispose();
     }
 
     /**
