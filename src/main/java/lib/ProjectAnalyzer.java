@@ -35,7 +35,7 @@ public interface ProjectAnalyzer {
      * @param srcClassPath path to class
      * @return ClassReport future
      */
-    Observable<ClassReport> getClassReport(String srcClassPath);
+    Observable<ClassReport> getClassReport(String... srcClassPath);
 
     /**
      * Async method to retrieve the report about a package,

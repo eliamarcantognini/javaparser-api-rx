@@ -58,13 +58,17 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
     }
 
     @Override
-    public Observable<ClassReport> getClassReport(String srcClassPath) {
-        return Observable.fromCallable(() -> {
+    public Observable<ClassReport> getClassReport(String... srcClassPath) {
+        return Observable.fromStream(Stream.of(srcClassPath).map(path -> {
             var report = new ClassReportImpl();
-            new ClassesVisitor(logger).visit(this.getCompilationUnit(srcClassPath), report);
+            try {
+                new ClassesVisitor(logger).visit(this.getCompilationUnit(path), report);
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
             logger.log(Logger.CodeElementFound.CLASS + " analyzed: "  + report.getName() + " @ " + report.getSourceFullPath());
             return report;
-        });
+        }));
     }
 
     @Override
