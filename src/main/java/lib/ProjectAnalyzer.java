@@ -9,7 +9,7 @@ import lib.reports.interfaces.ProjectReport;
 
 /**
  * Interface of a project analyzer. It contains methods to get async
- * reports using {@link java.util.concurrent.Future}
+ * reports using {@link io.reactivex.rxjava3.core.Observable}
  *
  * @see io.reactivex.rxjava3.core.Observable
  * @see InterfaceReport
@@ -24,7 +24,7 @@ public interface ProjectAnalyzer {
      * given the full path of the interface source file
      *
      * @param srcInterfacePath path to interface
-     * @return InterfaceReport future
+     * @return InterfaceReport observable
      */
     Observable<InterfaceReport> getInterfaceReport(String... srcInterfacePath);
 
@@ -33,7 +33,7 @@ public interface ProjectAnalyzer {
      * given the full path of the class source file
      *
      * @param srcClassPath path to class
-     * @return ClassReport future
+     * @return ClassReport observable
      */
     Observable<ClassReport> getClassReport(String... srcClassPath);
 
@@ -42,7 +42,7 @@ public interface ProjectAnalyzer {
      * given the full path of the package folder
      *
      * @param srcPackagePath path to package
-     * @return PackageReport future
+     * @return PackageReport observable
      */
     Observable<PackageReport> getPackageReport(String... srcPackagePath);
 
@@ -51,15 +51,16 @@ public interface ProjectAnalyzer {
      * given the full path of the project folder
      *
      * @param srcProjectFolderPath path to project
-     * @return ProjectReport future
+     * @return ProjectReport observable
      */
     Observable<ProjectReport> getProjectReport(String srcProjectFolderPath);
 
     /**
      * Async function that analyze a project given the full path of the project folder.
      * Real time result were sent in topic specified.
-     *  @param srcProjectFolderName path to project
-     * @return
+     *
+     * @param srcProjectFolderName path to project
+     * @return an observable
      */
     Observable<ProjectDTO> analyzeProject(String srcProjectFolderName);
 }
