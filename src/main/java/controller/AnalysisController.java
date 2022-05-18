@@ -49,7 +49,7 @@ public class AnalysisController {
         Observer<String> observer = new Observer<>() {
             public void onSubscribe(@NonNull Disposable d){}
             @Override
-            public void onNext(@NonNull String s) { view.printText(s); }
+            public void onNext(@NonNull String s) { manageMessage(s); }
             public void onError(@NonNull Throwable e) {}
             public void onComplete() {}
         };
@@ -79,14 +79,17 @@ public class AnalysisController {
      */
     public void startAnalysisProject() {
         this.setViewBehaviourAtStarts();
-        Observable<ProjectDTO> projectObservable = this.projectAnalyzer.analyzeProject(this.pathProjectToAnalyze, AnalysisController.CHANNEL_TOPIC);
-        projectDisposable = projectObservable.subscribe(result -> {
-            this.projectDTO = result;
-            this.view.setStopEnabled(false);
-            this.view.setSaveEnabled(true);
-            this.view.renderTree(projectDTO);
-            this.view.printText("PROJECT ANALYZE DONE.");
-        });
+        this.projectAnalyzer.analyzeProject(this.pathProjectToAnalyze);
+//        Observable<ProjectDTO> projectObservable = this.projectAnalyzer.analyzeProject(this.pathProjectToAnalyze, AnalysisController.CHANNEL_TOPIC);
+//        projectDisposable = projectObservable.subscribe(result -> {
+//            this.projectDTO = result;
+//            this.view.setStopEnabled(false);
+//            this.view.setSaveEnabled(true);
+//            this.view.renderTree(projectDTO);
+//            this.view.printText("PROJECT ANALYZE DONE.");
+//        });
+//        var projectObservable = this.projectAnalyzer.analyzeProject(this.pathProjectToAnalyze, AnalysisController.CHANNEL_TOPIC);
+//        projectDisposable = projectObservable.subscribe(this::manageMessage);
     }
 
     /**
@@ -95,7 +98,7 @@ public class AnalysisController {
     public void stopAnalysisProject() {
         this.view.setStopEnabled(false);
         this.view.setSaveEnabled(false);
-        projectDisposable.dispose();
+//        projectDisposable.dispose();
     }
 
     /**
@@ -120,7 +123,6 @@ public class AnalysisController {
     }
 
     private void manageMessage(final String message) {
-
         if (message.startsWith(Logger.CodeElementFound.PROJECT.getCode())) {
             this.projectDTO = DTOParser.parseProjectDTO(message.substring(Logger.CodeElementFound.PROJECT.getCode().length()));
             this.view.setSaveEnabled(true);

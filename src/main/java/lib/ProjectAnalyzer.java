@@ -58,9 +58,8 @@ public interface ProjectAnalyzer {
     /**
      * Async function that analyze a project given the full path of the project folder.
      * Real time result were sent in topic specified.
-     *  @param srcProjectFolderName path to project
-     * @param topic                topic where analysis results messages where sent
-     * @return
+     *
+     * @param srcProjectFolderName path to project
      */
-    Observable<ProjectDTO> analyzeProject(String srcProjectFolderName, String topic);
+    void analyzeProject(String srcProjectFolderName);
 }

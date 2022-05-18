@@ -6,8 +6,8 @@ import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Observer;
 import lib.Logger;
 import lib.ProjectAnalyzer;
+import lib.dto.DTOParser;
 import lib.dto.DTOs;
-import lib.dto.ProjectDTO;
 import lib.reports.ClassReportImpl;
 import lib.reports.InterfaceReportImpl;
 import lib.reports.PackageReportImpl;
@@ -44,10 +44,10 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
     @Override
     public Observable<InterfaceReport> getInterfaceReport(String srcInterfacePath) {
         return Observable.fromCallable(() -> {
-           var report = new InterfaceReportImpl();
-           new InterfacesVisitor(logger).visit(this.getCompilationUnit(srcInterfacePath), report);
-           logger.log(Logger.CodeElementFound.INTERFACE + " analyzed: "  + report.getName() + " @ " + report.getSourceFullPath());
-           return report;
+            var report = new InterfaceReportImpl();
+            new InterfacesVisitor(logger).visit(this.getCompilationUnit(srcInterfacePath), report);
+            logger.log(Logger.CodeElementFound.INTERFACE.getCode() + DTOParser.parseString(DTOs.createInterfaceDTO(report)));
+            return report;
         });
     }
 
@@ -56,7 +56,7 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
         return Observable.fromCallable(() -> {
             var report = new ClassReportImpl();
             new ClassesVisitor(logger).visit(this.getCompilationUnit(srcClassPath), report);
-            logger.log(Logger.CodeElementFound.CLASS + " analyzed: "  + report.getName() + " @ " + report.getSourceFullPath());
+            logger.log(Logger.CodeElementFound.CLASS.getCode() + DTOParser.parseString(DTOs.createClassDTO(report)));
             return report;
         });
     }
@@ -90,12 +90,11 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
                     e.printStackTrace();
                 }
             });
-            logger.log(Logger.CodeElementFound.PACKAGE + " analyzed: " + packageReport.getName());
+            logger.log(Logger.CodeElementFound.PACKAGE.getCode() + DTOParser.parseString(DTOs.createPackageDTO(packageReport)));
             return packageReport;
         });
 
     }
-
 
     @Override
     public Observable<ProjectReport> getProjectReport(String srcProjectFolderPath) {
@@ -109,27 +108,80 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
                             .map(File::getPath))
                     .toList();
             list.forEach(path -> getPackageReport(path).subscribe(packageReport -> {
-               packageReport.getClassesReports()
-                       .forEach(c -> c.getMethodsInfo()
-                               .forEach(m -> {
-                                   if (m.getName().equals("main")) projectReport.setMainClass(c);
-                               }));
-               projectReport.addPackageReport(packageReport);
+                packageReport.getClassesReports()
+                        .forEach(c -> c.getMethodsInfo()
+                                .forEach(m -> {
+                                    if (m.getName().equals("main")) projectReport.setMainClass(c);
+                                }));
+                projectReport.addPackageReport(packageReport);
             }));
+            logger.log(Logger.CodeElementFound.PROJECT.getCode() + DTOParser.parseString(DTOs.createProjectDTO(projectReport)));
             return projectReport;
         });
 
     }
 
     @Override
-    public Observable<ProjectDTO> analyzeProject(String srcProjectFolderName, String topic) {
-        return Observable.fromCallable(() -> {
-            final ProjectDTO[] res = {DTOs.createProjectDTO(new ProjectReportImpl())};
-            getProjectReport(srcProjectFolderName).subscribe(e -> res[0] = DTOs.createProjectDTO(e));
-            return res[0];
-        });
-
+    public void analyzeProject(String srcProjectFolderName) {
+        // Implementation full reactive, but is all done by the logger observer.
+        getProjectReport(srcProjectFolderName).subscribe(o -> logger.log("Finished."));
+        // First implementation.
+//        return Observable.fromCallable(() -> {
+//            final ProjectDTO[] res = {DTOs.createProjectDTO(new ProjectReportImpl())};
+//            getProjectReport(srcProjectFolderName).subscribe(e -> res[0] = DTOs.createProjectDTO(e));
+//            return res[0];
+//        });
+        // Implementation full reactive, every event is sent in the same observable as string.
+//        return Observable.create(emitter -> {
+//            var projectReport = new ProjectReportImpl();
+//            var folder = new File(srcProjectFolderName);
+//            var packages = Stream
+//                    .concat(Stream.of(folder.toString()), Stream.of(Objects.requireNonNull(folder.listFiles()))
+//                            .filter(File::isDirectory)
+//                            .map(File::getPath))
+//                    .toList();
+//            for (String pkg : packages) {
+//                var packageReport = new PackageReportImpl();
+//                var pkgNameSet = false;
+//                var files = Stream
+//                        .of(Objects.requireNonNull(folder.listFiles((dir, name) -> name.endsWith(".java"))))
+//                        .map(File::getPath)
+//                        .toList();
+//                for (String file : files) {
+//                    CompilationUnit cu;
+//                    try {
+//                        cu = this.getCompilationUnit(file);
+//                        if (cu.getType(0).asClassOrInterfaceDeclaration().isInterface()) {
+//                            var report = new InterfaceReportImpl();
+//                            new InterfacesVisitor(logger).visit(this.getCompilationUnit(file), report);
+//                            setPackageNameAndPath(packageReport, pkgNameSet, report.getName(), report.getSourceFullPath());
+//                            packageReport.addInterfaceReport(report);
+//                            emitter.onNext(Logger.CodeElementFound.INTERFACE.getCode() + DTOParser.parseString(DTOs.createInterfaceDTO(report)));
+//                        } else {
+//                            var report = new ClassReportImpl();
+//                            new ClassesVisitor(logger).visit(this.getCompilationUnit(file), report);
+//                            setPackageNameAndPath(packageReport, pkgNameSet, report.getName(), report.getSourceFullPath());
+//                            packageReport.addClassReport(report);
+//                            emitter.onNext(Logger.CodeElementFound.CLASS.getCode() + DTOParser.parseString(DTOs.createClassDTO(report)));
+//                        }
+//                    } catch (FileNotFoundException e) {}
+//                }
+//                projectReport.addPackageReport(packageReport);
+//                emitter.onNext(Logger.CodeElementFound.PACKAGE.getCode() + DTOParser.parseString(DTOs.createPackageDTO(packageReport)));
+//            }
+//            emitter.onNext(Logger.CodeElementFound.PROJECT.getCode() + DTOParser.parseString(DTOs.createProjectDTO(projectReport)));
+//            emitter.onComplete();
+//        });
     }
+
+//    private void setPackageNameAndPath(PackageReport packageReport, Boolean set, String name, String sourceFullPath) {
+//        if (!set) {
+//            var s = sourceFullPath.split("\\.");
+//            packageReport.setName(s.length == 1 ? "." : (s[s.length - 2]));
+//            packageReport.setFullPath(s.length == 1 ? "" : sourceFullPath.substring(0, sourceFullPath.length() - name.length() - 1));
+//            set = true;
+//        }
+//    }
 
     private void stopLibrary() {
     }
