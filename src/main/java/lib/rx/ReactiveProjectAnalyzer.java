@@ -12,17 +12,13 @@ import lib.reports.ClassReportImpl;
 import lib.reports.InterfaceReportImpl;
 import lib.reports.PackageReportImpl;
 import lib.reports.ProjectReportImpl;
-import lib.reports.interfaces.ClassReport;
-import lib.reports.interfaces.InterfaceReport;
-import lib.reports.interfaces.PackageReport;
-import lib.reports.interfaces.ProjectReport;
+import lib.reports.interfaces.*;
 import lib.visitors.ClassesVisitor;
 import lib.visitors.InterfacesVisitor;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -51,7 +47,7 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
             } catch (FileNotFoundException e) {
                 throw new RuntimeException(e);
             }
-            logger.log(Logger.CodeElementFound.INTERFACE + " analyzed: "  + report.getName() + " @ " + report.getSourceFullPath());
+            logger.log(Logger.CodeElementFound.INTERFACE + " analyzed: " + report.getName() + " @ " + report.getSourceFullPath());
             return report;
         }));
 
@@ -66,7 +62,7 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
             } catch (FileNotFoundException e) {
                 throw new RuntimeException(e);
             }
-            logger.log(Logger.CodeElementFound.CLASS + " analyzed: "  + report.getName() + " @ " + report.getSourceFullPath());
+            logger.log(Logger.CodeElementFound.CLASS + " analyzed: " + report.getName() + " @ " + report.getSourceFullPath());
             return report;
         }));
     }
@@ -75,11 +71,7 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
     public Observable<PackageReport> getPackageReport(String... srcPackagePath) {
         return Observable.fromStream(Stream.of(srcPackagePath).map((path) -> {
             var packageReport = new PackageReportImpl();
-            //TODO controllare per bene se si può settare il nome del package da qui
-            var s = path.split("/");
-            packageReport.setName(s[s.length-1]);
-            packageReport.setFullPath(path.replaceAll("/", "."));
-//                    var set = new AtomicBoolean(false);
+            packageReport.setFullPath(path);
             var folder = new File(path);
             Stream.of(Objects.requireNonNull(folder.listFiles((dir, name) -> name.endsWith(".java"))))
                     .map(File::getPath)
@@ -96,6 +88,7 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
                             getClassReport(list.toArray(new String[0])).subscribe(packageReport::addClassReport);
                         }
                     });
+            setPackageNameAndFullName(packageReport);
             logger.log(Logger.CodeElementFound.PACKAGE + " analyzed: " + packageReport.getName());
             return packageReport;
         }));
@@ -114,12 +107,12 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
                             .map(File::getPath))
                     .toList();
             list.forEach(path -> getPackageReport(path).subscribe(packageReport -> {
-               packageReport.getClassesReports()
-                       .forEach(c -> c.getMethodsInfo()
-                               .forEach(m -> {
-                                   if (m.getName().equals("main")) projectReport.setMainClass(c);
-                               }));
-               projectReport.addPackageReport(packageReport);
+                packageReport.getClassesReports()
+                        .forEach(c -> c.getMethodsInfo()
+                                .forEach(m -> {
+                                    if (m.getName().equals("main")) projectReport.setMainClass(c);
+                                }));
+                projectReport.addPackageReport(packageReport);
             }));
             return projectReport;
         });
@@ -150,12 +143,18 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
         return StaticJavaParser.parse(new File(path));
     }
 
-    private void setPackageNameAndPath(PackageReport packageReport, AtomicBoolean set, String name, String sourceFullPath) {
-        if (!set.get()) {
-            var s = sourceFullPath.split("\\.");
-            packageReport.setName(s.length == 1 ? "." : (s[s.length - 2]));
-            packageReport.setFullPath(s.length == 1 ? "" : sourceFullPath.substring(0, sourceFullPath.length() - name.length() - 1));
-            set.set(true);
+    private void setPackageNameAndFullName(PackageReportImpl packageReport) {
+        var name = "Package name not found";
+        var fullPath = "Full name not found";
+        Report report = !packageReport.getClassesReports().isEmpty() ? packageReport.getClassesReports().get(0) :
+                (!packageReport.getInterfaceReports().isEmpty() ? packageReport.getInterfaceReports().get(0) : null);
+        if (report != null) {
+            var s = report.getSourceFullPath().split("\\.");
+            fullPath = s.length == 1 ? "" : report.getSourceFullPath().substring(0, report.getSourceFullPath().length() - report.getName().length() - 1);
+            name = s.length == 1 ? "." : (s[s.length - 2]);
         }
+        packageReport.setName(name);
+        packageReport.setFullPath(fullPath);
     }
+
 }
