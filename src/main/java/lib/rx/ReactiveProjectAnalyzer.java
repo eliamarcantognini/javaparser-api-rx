@@ -27,7 +27,8 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
     private final Logger logger;
 
     /**
-     * Constructor of class
+     * Constructor of class.
+     * @param observer the observer used by the logger.
      */
     public ReactiveProjectAnalyzer(Observer<String> observer) {
         this.logger = observer::onNext;
