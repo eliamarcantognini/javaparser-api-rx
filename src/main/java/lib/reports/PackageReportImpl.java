@@ -71,7 +71,7 @@ public class PackageReportImpl implements PackageReport {
     public String toString() {
         return "PackageReport:\n"
                 + "\tPackage Name: " + this.getName() + "\n"
-                + "\tSource Full File Name: " + this.getSourceFullPath() + "\n"
+                + "\tPackage path: " + this.getSourceFullPath() + "\n"
                 + "\tClass Reports: \n" + this.classReports.toString() + "\n"
                 + "\tInterface Reports: \n" + this.interfaceReports.toString() + "\n";
     }
