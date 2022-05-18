@@ -103,17 +103,13 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
 
             var list = Stream
                     .concat(Stream.of(folder.toString()), Stream.of(Objects.requireNonNull(folder.listFiles()))
-                            .filter(File::isDirectory)
-                            .map(File::getPath))
+                    .filter(File::isDirectory)
+                    .map(File::getPath))
                     .toList();
-            list.forEach(path -> getPackageReport(path).subscribe(packageReport -> {
-                packageReport.getClassesReports()
-                        .forEach(c -> c.getMethodsInfo()
-                                .forEach(m -> {
-                                    if (m.getName().equals("main")) projectReport.setMainClass(c);
-                                }));
-                projectReport.addPackageReport(packageReport);
-            }));
+            getPackageReport(list.toArray(new String[0])).subscribe(item -> {
+                item.getClassesReports().stream().filter(m -> m.getName().equals("main")).findFirst().ifPresent(projectReport::setMainClass);
+                projectReport.addPackageReport(item);
+            });
             return projectReport;
         });
 
