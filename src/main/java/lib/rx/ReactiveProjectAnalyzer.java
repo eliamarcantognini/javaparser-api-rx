@@ -23,11 +23,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
-    /**
-     * Topic where messages are sent if no channel for {}
-     * hasn't been specified yet
-     */
-    public static final String CHANNEL_DEFAULT = "default";
 
     private final Logger logger;
 
@@ -50,7 +45,6 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
             logger.log(report);
             return report;
         }));
-
     }
 
     @Override
@@ -94,13 +88,11 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
         }));
     }
 
-
     @Override
     public Observable<ProjectReport> getProjectReport(String srcProjectFolderPath) {
         return Observable.fromCallable(() -> {
             var projectReport = new ProjectReportImpl();
-            final File folder = new File(srcProjectFolderPath);
-
+            var folder = new File(srcProjectFolderPath);
             var list = Stream
                     .concat(Stream.of(folder.toString()), Stream.of(Objects.requireNonNull(folder.listFiles()))
                             .filter(File::isDirectory)
@@ -116,7 +108,6 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
             logger.log(projectReport);
             return projectReport;
         });
-
     }
 
     @Override
@@ -127,9 +118,6 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
             return res[0];
         });
 
-    }
-
-    private void stopLibrary() {
     }
 
     /**
