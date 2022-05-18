@@ -4,6 +4,8 @@ import lib.dto.*;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import static view.utils.Strings.*;
+
 /**
  * Static class to manage and get {@link javax.swing.tree.DefaultMutableTreeNode} from DTO report
  *
@@ -17,6 +19,7 @@ public final class Trees {
     private final static int CHARACTERS_TO_SUBSTRING_IN_METHODS_MODS_PRESENTS = 17;
     private final static int CHARACTERS_TO_SUBSTRING_IN_FIELDS = 9;
 
+
     private Trees() {
     }
 
@@ -28,8 +31,8 @@ public final class Trees {
      */
     public static DefaultMutableTreeNode createClassOrInterfaceTreeNode(ClassInterfaceDTO dto) {
         var root = new DefaultMutableTreeNode(dto.name());
-        root.add(new DefaultMutableTreeNode("Path: " + dto.path()));
-        var methodsNode = new DefaultMutableTreeNode(dto.methods().isEmpty() ? "No methods" : "Methods");
+        root.add(new DefaultMutableTreeNode(PATH + dto.path()));
+        var methodsNode = new DefaultMutableTreeNode(dto.methods().isEmpty() ? NO_METHODS : METHODS);
         for (MethodDTO m : dto.methods()) {
             if (m.modifiers() != null)
                 methodsNode.add(new DefaultMutableTreeNode(m.toString().substring(CHARACTERS_TO_SUBSTRING_IN_METHODS, m.toString().length() - 1)));
@@ -38,7 +41,7 @@ public final class Trees {
         }
         root.add(methodsNode);
         if (dto.fields() != null) {
-            var fieldsNode = new DefaultMutableTreeNode(dto.fields().isEmpty() ? "No fields" : "Fields");
+            var fieldsNode = new DefaultMutableTreeNode(dto.fields().isEmpty() ? NO_FIELDS : FIELDS);
             for (FieldDTO f : dto.fields()) {
                 fieldsNode.add(new DefaultMutableTreeNode(f.toString().substring(CHARACTERS_TO_SUBSTRING_IN_FIELDS, f.toString().length() - 1)));
             }
@@ -55,12 +58,12 @@ public final class Trees {
      */
     public static DefaultMutableTreeNode createPackageTreeNode(PackageDTO dto) {
         var root = new DefaultMutableTreeNode(dto.name());
-        root.add(new DefaultMutableTreeNode("Full Name: " + dto.path()));
-        var interfaces = new DefaultMutableTreeNode(dto.interfaces().isEmpty() ? "No interfaces" : "Interfaces");
+        root.add(new DefaultMutableTreeNode(FULL_NAME + dto.path()));
+        var interfaces = new DefaultMutableTreeNode(dto.interfaces().isEmpty() ? NO_INTERFACES : INTERFACES);
         for (ClassInterfaceDTO c : dto.interfaces())
             interfaces.add(createClassOrInterfaceTreeNode(c));
         root.add(interfaces);
-        var classes = new DefaultMutableTreeNode(dto.classes().isEmpty() ? "No classes" : "Classes");
+        var classes = new DefaultMutableTreeNode(dto.classes().isEmpty() ? NO_CLASSES : CLASSES);
         for (ClassInterfaceDTO c : dto.classes())
             classes.add(createClassOrInterfaceTreeNode(c));
         root.add(classes);
@@ -76,10 +79,10 @@ public final class Trees {
      */
     public static DefaultMutableTreeNode createProjectTreeNode(ProjectDTO dto) {
         var root = new DefaultMutableTreeNode("Project");
-        var mainClass = new DefaultMutableTreeNode(dto.mainClass().name().isBlank() ? "No Main Class" : "Main class");
+        var mainClass = new DefaultMutableTreeNode(dto.mainClass().name().isBlank() ? NO_MAIN_CLASS : MAIN_CLASS);
         if (!dto.mainClass().name().isBlank()) mainClass.add(createClassOrInterfaceTreeNode(dto.mainClass()));
         root.add(mainClass);
-        var packages = new DefaultMutableTreeNode(dto.packages().isEmpty() ? "No packages" : "Packages");
+        var packages = new DefaultMutableTreeNode(dto.packages().isEmpty() ? NO_PACKAGES : PACKAGES);
         for (PackageDTO p : dto.packages())
             packages.add(createPackageTreeNode(p));
         root.add(packages);

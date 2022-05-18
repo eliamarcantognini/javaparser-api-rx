@@ -36,6 +36,20 @@ public final class Strings {
      * Windows name of save report error
      */
     public static final String SAVE_ERROR = "SAVE ERROR";
+    public static final String NO_INTERFACES = "No interfaces";
+    public static final String INTERFACES = "Interfaces";
+    public static final String NO_CLASSES = "No classes";
+    public static final String CLASSES = "Classes";
+    public static final String FULL_NAME = "Full Name: ";
+    public static final String MAIN_CLASS = "Main class";
+    public static final String NO_MAIN_CLASS = "No Main Class";
+    public static final String NO_PACKAGES = "No packages";
+    public static final String PACKAGES = "Packages";
+    public static final String NO_METHODS = "No methods";
+    public static final String METHODS = "Methods";
+    public static final String PATH = "Path: ";
+    public static final String FIELDS = "Fields";
+    public static final String NO_FIELDS = "No fields";
     /**
      * Main windows name
      */
