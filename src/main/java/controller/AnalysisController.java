@@ -49,9 +49,9 @@ public class AnalysisController {
         Observer<String> observer = new Observer<>() {
             public void onSubscribe(@NonNull Disposable d){}
             @Override
-            public void onNext(@NonNull String s) { view.printText(s); }
-            public void onError(@NonNull Throwable e) {}
-            public void onComplete() {}
+            public void onNext(@NonNull String s) { manageMessage(s); }
+            public void onError(@NonNull Throwable e) {view.printText("Error!");}
+            public void onComplete() {view.printText("Finished :D");}
         };
         this.projectAnalyzer = new ReactiveProjectAnalyzer(observer);
     }
@@ -123,18 +123,17 @@ public class AnalysisController {
 
         if (message.startsWith(Logger.CodeElementFound.PROJECT.getCode())) {
             this.projectDTO = DTOParser.parseProjectDTO(message.substring(Logger.CodeElementFound.PROJECT.getCode().length()));
-            this.view.setSaveEnabled(true);
-            this.view.setStopEnabled(false);
-            this.view.renderTree(projectDTO);
+            var s = projectDTO.mainClass().name().isBlank() ? "" : ("entry point at " + projectDTO.mainClass().name() + " class and ");
+            this.view.printText("Finished parsing. Project has " + s + projectDTO.packages().size() + " packages.");
         } else if (message.startsWith(Logger.CodeElementFound.PACKAGE.getCode())) {
             PackageDTO packageFound = DTOParser.parsePackageDTO(message.substring(Logger.CodeElementFound.PACKAGE.getCode().length()));
-            this.view.printText("Found package " + packageFound.name() + " at path " + packageFound.path());
+            this.view.printText("Found package " + packageFound.path());
         } else if (message.startsWith(Logger.CodeElementFound.CLASS.getCode())) {
             var classFound = DTOParser.parseClassInterfaceDTO(message.substring(Logger.CodeElementFound.CLASS.getCode().length()));
-            this.view.printText("Found class " + classFound.name() + " at path " + classFound.path());
+            this.view.printText("Found class " + classFound.name() + " with fully classified name " + classFound.path());
         } else if (message.startsWith(Logger.CodeElementFound.INTERFACE.getCode())) {
             var interfaceFound = DTOParser.parseClassInterfaceDTO(message.substring(Logger.CodeElementFound.INTERFACE.getCode().length()));
-            this.view.printText("Found interface " + interfaceFound.name() + " at path " + interfaceFound.path());
+            this.view.printText("Found interface " + interfaceFound.name() + " with fully classified name " + interfaceFound.path());
         } else if (message.startsWith(Logger.CodeElementFound.METHOD.getCode())) {
             var methodFound = DTOParser.parseMethodDTO(message.substring(Logger.CodeElementFound.METHOD.getCode().length()));
             this.view.printText("Found method " + methodFound.name());

@@ -66,8 +66,7 @@ public class FileVisitor<T extends InterfaceReport> extends VoidVisitorAdapter<T
             builder.beginLine(-1).endLine(-1);
         }
         MethodInfo method = builder.buildMethod();
-        logger.log(Logger.CodeElementFound.METHOD + " found: " + method.getName());
-//        logger.log(method);
+        logger.log(method);
         collector.addMethodInfo(method);
     }
 

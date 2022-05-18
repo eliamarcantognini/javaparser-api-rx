@@ -47,7 +47,7 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
             } catch (FileNotFoundException e) {
                 throw new RuntimeException(e);
             }
-            logger.log(Logger.CodeElementFound.INTERFACE + " analyzed: " + report.getName() + " @ " + report.getSourceFullPath());
+            logger.log(report);
             return report;
         }));
 
@@ -62,7 +62,7 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
             } catch (FileNotFoundException e) {
                 throw new RuntimeException(e);
             }
-            logger.log(Logger.CodeElementFound.CLASS + " analyzed: " + report.getName() + " @ " + report.getSourceFullPath());
+            logger.log(report);
             return report;
         }));
     }
@@ -89,7 +89,7 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
                         }
                     });
             setPackageNameAndFullName(packageReport);
-            logger.log(Logger.CodeElementFound.PACKAGE + " analyzed: " + packageReport.getName());
+            logger.log(packageReport);
             return packageReport;
         }));
     }
@@ -103,13 +103,17 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
 
             var list = Stream
                     .concat(Stream.of(folder.toString()), Stream.of(Objects.requireNonNull(folder.listFiles()))
-                    .filter(File::isDirectory)
-                    .map(File::getPath))
+                            .filter(File::isDirectory)
+                            .map(File::getPath))
                     .toList();
             getPackageReport(list.toArray(new String[0])).subscribe(item -> {
-                item.getClassesReports().stream().filter(m -> m.getName().equals("main")).findFirst().ifPresent(projectReport::setMainClass);
+                item.getClassesReports().stream()
+                        .filter(c -> c.getMethodsInfo().stream().anyMatch(m -> m.getName().equals("main")))
+                        .findFirst()
+                        .ifPresent(projectReport::setMainClass);
                 projectReport.addPackageReport(item);
             });
+            logger.log(projectReport);
             return projectReport;
         });
 

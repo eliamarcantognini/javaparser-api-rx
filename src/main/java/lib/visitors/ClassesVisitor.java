@@ -37,7 +37,7 @@ public class ClassesVisitor extends FileVisitor<ClassReport> {
                 .modifiers("" + fd.getModifiers())
                 .report(collector);
         FieldInfo field = builder.buildField();
-        logger.log(Logger.CodeElementFound.FIELD + " found: " + field.getFieldName());
+        logger.log(field);
         collector.addFieldInfo(field);
     }
 }
