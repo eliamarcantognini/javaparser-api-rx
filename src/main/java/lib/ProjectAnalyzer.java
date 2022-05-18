@@ -26,7 +26,7 @@ public interface ProjectAnalyzer {
      * @param srcInterfacePath path to interface
      * @return InterfaceReport future
      */
-    Observable<InterfaceReport> getInterfaceReport(String srcInterfacePath);
+    Observable<InterfaceReport> getInterfaceReport(String... srcInterfacePath);
 
     /**
      * Async method to retrieve the report about a specific class,
@@ -35,7 +35,7 @@ public interface ProjectAnalyzer {
      * @param srcClassPath path to class
      * @return ClassReport future
      */
-    Observable<ClassReport> getClassReport(String srcClassPath);
+    Observable<ClassReport> getClassReport(String... srcClassPath);
 
     /**
      * Async method to retrieve the report about a package,
@@ -44,7 +44,7 @@ public interface ProjectAnalyzer {
      * @param srcPackagePath path to package
      * @return PackageReport future
      */
-    Observable<PackageReport> getPackageReport(String srcPackagePath);
+    Observable<PackageReport> getPackageReport(String... srcPackagePath);
 
     /**
      * Async method to retrieve the report about a project

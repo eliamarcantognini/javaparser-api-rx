@@ -114,7 +114,7 @@ public class TreeGUI implements View {
                 var j = new JOptionPane();
                 var o = j.createDialog(frame, title);
                 j.setMessage(message);
-                o.addWindowListener(new MyWindowListener());
+                o.addWindowListener(new ChooserWindowsListener());
                 o.setVisible(true);
             });
         }
@@ -146,18 +146,26 @@ public class TreeGUI implements View {
             btnPane.add(btnSave);
 
             getContentPane().add(btnPane, BorderLayout.NORTH);
-
+            this.addWindowListener(new TreeLoggerWindowsListener());
             this.setVisible(true);
         }
 
     }
 
-    private static class MyWindowListener implements WindowListener {
-        @Override
+    private class TreeLoggerWindowsListener implements WindowListener {
+        public void windowOpened(WindowEvent e) {}
+        public void windowClosing(WindowEvent e) { loggerGUI.close(); }
+        public void windowClosed(WindowEvent e) {}
+        public void windowIconified(WindowEvent e) {}
+        public void windowDeiconified(WindowEvent e) {}
+        public void windowActivated(WindowEvent e) {}
+        public void windowDeactivated(WindowEvent e) {}
+    }
+
+    private static class ChooserWindowsListener implements WindowListener {
         public void windowOpened(WindowEvent e) {
             setError(true);
         }
-        @Override
         public void windowClosed(WindowEvent e) {
             setError(false);
         }
