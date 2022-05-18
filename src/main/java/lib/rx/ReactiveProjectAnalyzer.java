@@ -111,13 +111,12 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
     }
 
     @Override
-    public Observable<ProjectDTO> analyzeProject(String srcProjectFolderName, String topic) {
+    public Observable<ProjectDTO> analyzeProject(String srcProjectFolderName) {
         return Observable.fromCallable(() -> {
             final ProjectDTO[] res = {DTOs.createProjectDTO(new ProjectReportImpl())};
             getProjectReport(srcProjectFolderName).subscribe(e -> res[0] = DTOs.createProjectDTO(e));
             return res[0];
         });
-
     }
 
     /**
