@@ -22,6 +22,9 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * The ProjectAnalyzer which uses ReactiveX.
+ */
 public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
 
     private final Logger logger;

@@ -40,6 +40,9 @@ public class LoggerGUI {
         frame.addText(textToPrint);
     }
 
+    /**
+     * Close the View.
+     */
     public void close() {
         this.frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
     }
