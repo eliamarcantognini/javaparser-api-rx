@@ -121,13 +121,37 @@ public interface Logger {
      * Enum that represents the identifiers used to understand which object is logged.
      */
     enum CodeElementFound{
+        /**
+         * Method found code.
+         */
         METHOD("METHOD_REPORT:"),
+        /**
+         * Field found code.
+         */
         FIELD("FIELD_REPORT:"),
+        /**
+         * Class found code.
+         */
         CLASS("CLASS_REPORT:"),
+        /**
+         * Interface found code.
+         */
         INTERFACE("INTERFACE_REPORT:"),
+        /**
+         * Package found code.
+         */
         PACKAGE("PACKAGE_REPORT:"),
+        /**
+         * Project found code.
+         */
         PROJECT("PROJECT_REPORT:"),
+        /**
+         * Error code.
+         */
         ERROR("ERROR:"),
+        /**
+         * Stop interrupt code.
+         */
         INTERRUPT("INTERRUPT:");
 
         private final String code;
