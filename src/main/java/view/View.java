@@ -5,7 +5,7 @@ import lib.dto.PackageDTO;
 import lib.dto.ProjectDTO;
 
 /**
- * //TODO: complete javadoc
+ * The View interface define the behaviour needs to use the library within a custom GUI or CLI.
  */
 public interface View {
 
