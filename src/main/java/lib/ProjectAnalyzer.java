@@ -20,28 +20,28 @@ import lib.reports.interfaces.ProjectReport;
 public interface ProjectAnalyzer {
 
     /**
-     * Async method to retrieve the report about a specific interface,
+     * Async method to retrieve the report about a variable number of  interface,
      * given the full path of the interface source file
      *
-     * @param srcInterfacePath path to interface
+     * @param srcInterfacePath variable argument for file paths
      * @return InterfaceReport observable
      */
     Observable<InterfaceReport> getInterfaceReport(String... srcInterfacePath);
 
     /**
-     * Async method to retrieve the report about a specific class,
+     * Async method to retrieve the report about a variable number of  class,
      * given the full path of the class source file
      *
-     * @param srcClassPath path to class
+     * @param srcClassPath variable argument for file paths
      * @return ClassReport observable
      */
     Observable<ClassReport> getClassReport(String... srcClassPath);
 
     /**
-     * Async method to retrieve the report about a package,
+     * Async method to retrieve the report about a variable number of package,
      * given the full path of the package folder
      *
-     * @param srcPackagePath path to package
+     * @param srcPackagePath variable argument for folder paths
      * @return PackageReport observable
      */
     Observable<PackageReport> getPackageReport(String... srcPackagePath);
@@ -57,7 +57,6 @@ public interface ProjectAnalyzer {
 
     /**
      * Async function that analyze a project given the full path of the project folder.
-     * Real time result were sent in topic specified.
      *
      * @param srcProjectFolderName path to project
      * @return an observable
