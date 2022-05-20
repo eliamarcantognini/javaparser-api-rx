@@ -120,19 +120,19 @@ implements <a href="../ProjectAnalyzer.html" title="interface in lib">ProjectAna
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>io.reactivex.rxjava3.core.Observable&lt;<a href="../reports/interfaces/ClassReport.html" title="interface in lib.reports.interfaces">ClassReport</a>&gt;</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getClassReport(java.lang.String...)" class="member-name-link">getClassReport</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>...&nbsp;srcClassPath)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Async method to retrieve the report about a specific class,
+<div class="block">Async method to retrieve the report about a variable number of  class,
  given the full path of the class source file</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>io.reactivex.rxjava3.core.Observable&lt;<a href="../reports/interfaces/InterfaceReport.html" title="interface in lib.reports.interfaces">InterfaceReport</a>&gt;</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getInterfaceReport(java.lang.String...)" class="member-name-link">getInterfaceReport</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>...&nbsp;srcInterfacePath)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Async method to retrieve the report about a specific interface,
+<div class="block">Async method to retrieve the report about a variable number of  interface,
  given the full path of the interface source file</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>io.reactivex.rxjava3.core.Observable&lt;<a href="../reports/interfaces/PackageReport.html" title="interface in lib.reports.interfaces">PackageReport</a>&gt;</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getPackageReport(java.lang.String...)" class="member-name-link">getPackageReport</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>...&nbsp;srcPackagePath)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Async method to retrieve the report about a package,
+<div class="block">Async method to retrieve the report about a variable number of package,
  given the full path of the package folder</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>io.reactivex.rxjava3.core.Observable&lt;<a href="../reports/interfaces/ProjectReport.html" title="interface in lib.reports.interfaces">ProjectReport</a>&gt;</code></div>
@@ -182,13 +182,13 @@ implements <a href="../ProjectAnalyzer.html" title="interface in lib">ProjectAna
 <h3>getInterfaceReport</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">io.reactivex.rxjava3.core.Observable&lt;<a href="../reports/interfaces/InterfaceReport.html" title="interface in lib.reports.interfaces">InterfaceReport</a>&gt;</span>&nbsp;<span class="element-name">getInterfaceReport</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>...&nbsp;srcInterfacePath)</span></div>
 <div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="../ProjectAnalyzer.html#getInterfaceReport(java.lang.String...)">ProjectAnalyzer</a></code></span></div>
-<div class="block">Async method to retrieve the report about a specific interface,
+<div class="block">Async method to retrieve the report about a variable number of  interface,
  given the full path of the interface source file</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../ProjectAnalyzer.html#getInterfaceReport(java.lang.String...)">getInterfaceReport</a></code>&nbsp;in interface&nbsp;<code><a href="../ProjectAnalyzer.html" title="interface in lib">ProjectAnalyzer</a></code></dd>
 <dt>Parameters:</dt>
-<dd><code>srcInterfacePath</code> - path to interface</dd>
+<dd><code>srcInterfacePath</code> - variable argument for file paths</dd>
 <dt>Returns:</dt>
 <dd>InterfaceReport observable</dd>
 </dl>
@@ -199,13 +199,13 @@ implements <a href="../ProjectAnalyzer.html" title="interface in lib">ProjectAna
 <h3>getClassReport</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">io.reactivex.rxjava3.core.Observable&lt;<a href="../reports/interfaces/ClassReport.html" title="interface in lib.reports.interfaces">ClassReport</a>&gt;</span>&nbsp;<span class="element-name">getClassReport</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>...&nbsp;srcClassPath)</span></div>
 <div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="../ProjectAnalyzer.html#getClassReport(java.lang.String...)">ProjectAnalyzer</a></code></span></div>
-<div class="block">Async method to retrieve the report about a specific class,
+<div class="block">Async method to retrieve the report about a variable number of  class,
  given the full path of the class source file</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../ProjectAnalyzer.html#getClassReport(java.lang.String...)">getClassReport</a></code>&nbsp;in interface&nbsp;<code><a href="../ProjectAnalyzer.html" title="interface in lib">ProjectAnalyzer</a></code></dd>
 <dt>Parameters:</dt>
-<dd><code>srcClassPath</code> - path to class</dd>
+<dd><code>srcClassPath</code> - variable argument for file paths</dd>
 <dt>Returns:</dt>
 <dd>ClassReport observable</dd>
 </dl>
@@ -216,13 +216,13 @@ implements <a href="../ProjectAnalyzer.html" title="interface in lib">ProjectAna
 <h3>getPackageReport</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">io.reactivex.rxjava3.core.Observable&lt;<a href="../reports/interfaces/PackageReport.html" title="interface in lib.reports.interfaces">PackageReport</a>&gt;</span>&nbsp;<span class="element-name">getPackageReport</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>...&nbsp;srcPackagePath)</span></div>
 <div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="../ProjectAnalyzer.html#getPackageReport(java.lang.String...)">ProjectAnalyzer</a></code></span></div>
-<div class="block">Async method to retrieve the report about a package,
+<div class="block">Async method to retrieve the report about a variable number of package,
  given the full path of the package folder</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../ProjectAnalyzer.html#getPackageReport(java.lang.String...)">getPackageReport</a></code>&nbsp;in interface&nbsp;<code><a href="../ProjectAnalyzer.html" title="interface in lib">ProjectAnalyzer</a></code></dd>
 <dt>Parameters:</dt>
-<dd><code>srcPackagePath</code> - path to package</dd>
+<dd><code>srcPackagePath</code> - variable argument for folder paths</dd>
 <dt>Returns:</dt>
 <dd>PackageReport observable</dd>
 </dl>
@@ -250,8 +250,7 @@ implements <a href="../ProjectAnalyzer.html" title="interface in lib">ProjectAna
 <h3>analyzeProject</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">io.reactivex.rxjava3.core.Observable&lt;<a href="../dto/ProjectDTO.html" title="class in lib.dto">ProjectDTO</a>&gt;</span>&nbsp;<span class="element-name">analyzeProject</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;srcProjectFolderName)</span></div>
 <div class="block"><span class="descfrm-type-label">Description copied from interface:&nbsp;<code><a href="../ProjectAnalyzer.html#analyzeProject(java.lang.String)">ProjectAnalyzer</a></code></span></div>
-<div class="block">Async function that analyze a project given the full path of the project folder.
- Real time result were sent in topic specified.</div>
+<div class="block">Async function that analyze a project given the full path of the project folder.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="../ProjectAnalyzer.html#analyzeProject(java.lang.String)">analyzeProject</a></code>&nbsp;in interface&nbsp;<code><a href="../ProjectAnalyzer.html" title="interface in lib">ProjectAnalyzer</a></code></dd>
