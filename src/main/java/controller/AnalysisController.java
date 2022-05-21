@@ -1,17 +1,13 @@
 package controller;
 
 import io.reactivex.rxjava3.annotations.NonNull;
-import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Observer;
 import io.reactivex.rxjava3.disposables.Disposable;
-import io.reactivex.rxjava3.observers.DefaultObserver;
 import lib.Logger;
 import lib.ProjectAnalyzer;
 import lib.dto.DTOParser;
-import lib.dto.DTOs;
 import lib.dto.PackageDTO;
 import lib.dto.ProjectDTO;
-import lib.reports.interfaces.ProjectReport;
 import lib.rx.ReactiveProjectAnalyzer;
 import view.View;
 import view.utils.Strings;
@@ -42,7 +38,7 @@ public class AnalysisController {
      * Constructor of class
      */
     public AnalysisController() {
-        /**
+        /*
          * Implement the onNext method to manage the library's logger stream of messages.
          * In this case, the controller takes every message sent by the logger and manage it in the manageMessage method.
          */
