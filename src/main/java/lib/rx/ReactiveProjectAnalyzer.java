@@ -2,117 +2,125 @@ package lib.rx;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Observer;
 import lib.Logger;
 import lib.ProjectAnalyzer;
-import lib.reports.interfaces.ClassReport;
-import lib.reports.interfaces.InterfaceReport;
-import lib.reports.interfaces.PackageReport;
-import lib.reports.interfaces.ProjectReport;
+import lib.dto.DTOs;
+import lib.dto.ProjectDTO;
+import lib.reports.ClassReportImpl;
+import lib.reports.InterfaceReportImpl;
+import lib.reports.PackageReportImpl;
+import lib.reports.ProjectReportImpl;
+import lib.reports.interfaces.*;
+import lib.visitors.ClassesVisitor;
+import lib.visitors.InterfacesVisitor;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.concurrent.Future;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+/**
+ * The ProjectAnalyzer which uses ReactiveX.
+ */
 public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
-    /**
-     * Topic where messages are sent if no channel for {}
-     * hasn't been specified yet
-     */
-    public static final String CHANNEL_DEFAULT = "default";
 
-    private Logger logger;
+    private final Logger logger;
 
     /**
-     * Constructor of class
+     * Constructor of class.
+     * @param observer the observer used by the logger.
      */
-    public ReactiveProjectAnalyzer() {
+    public ReactiveProjectAnalyzer(Observer<String> observer) {
+        this.logger = observer::onNext;
     }
 
     @Override
-    public Future<InterfaceReport> getInterfaceReport(String srcInterfacePath) {
-//        return this.vertx.executeBlocking(ev -> {
-//            InterfacesVisitor interfaceVisitor = new InterfacesVisitor(logger);
-//            InterfaceReport interfaceReport = new InterfaceReportImpl();
-//            try {
-//                interfaceVisitor.visit(this.getCompilationUnit(srcInterfacePath), interfaceReport);
-//                logger.log(interfaceReport);
-//                ev.complete(interfaceReport);
-//            } catch (FileNotFoundException e) {
-//                ev.fail("EXCEPTION: getInterfaceReport has failed with message: " + e.getMessage());
-//            }
-//        });
-        return null;
+    public Observable<InterfaceReport> getInterfaceReport(String... srcInterfacePath) {
+        return Observable.fromStream(Stream.of(srcInterfacePath).map(path -> {
+            var report = new InterfaceReportImpl();
+            try {
+                new InterfacesVisitor(logger).visit(this.getCompilationUnit(path), report);
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+            logger.log(report);
+            return report;
+        }));
     }
 
     @Override
-    public Future<ClassReport> getClassReport(String srcClassPath) {
-//        return this.vertx.executeBlocking(ev -> {
-//            ClassesVisitor classVisitor = new ClassesVisitor(logger);
-//            ClassReport classReport = new ClassReportImpl();
-//            try {
-//                classVisitor.visit(this.getCompilationUnit(srcClassPath), classReport);
-//                logger.log(classReport);
-//                ev.complete(classReport);
-//            } catch (FileNotFoundException e) {
-//                ev.fail("EXCEPTION: getClassReport has failed with message: " + e.getMessage());
-//            }
-//        });
-        return null;
+    public Observable<ClassReport> getClassReport(String... srcClassPath) {
+        return Observable.fromStream(Stream.of(srcClassPath).map(path -> {
+            var report = new ClassReportImpl();
+            try {
+                new ClassesVisitor(logger).visit(this.getCompilationUnit(path), report);
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+            logger.log(report);
+            return report;
+        }));
     }
 
     @Override
-    public Future<PackageReport> getPackageReport(String srcPackagePath) {
-//        Promise<PackageReport> promise = new PromiseImpl<>();
-//        if (!new File(srcPackagePath).isDirectory()) {
-//            promise.fail("Package path is not a directory");
-//        } else {
-//            PackageVerticle vert = new PackageVerticle(this, promise, srcPackagePath, this.logger);
-//            this.vertx.deployVerticle(vert).onComplete(id -> this.verticleIDs.add(id.result()));
-//            promise.future().onFailure(res -> {
-//                if (!res.getMessage().equals(Logger.STOP_ANALYZING_PROJECT)) {
-//                    logger.logError(res.getMessage());
-//                }
-//            });
-//        }
-//        return promise.future();
-        return null;
-    }
-
-
-    @Override
-    public Future<ProjectReport> getProjectReport(String srcProjectFolderPath) {
-//        Promise<ProjectReport> promise = new PromiseImpl<>();
-//        if (!new File(srcProjectFolderPath).isDirectory()) {
-//            promise.fail("Package path is not a directory");
-//        } else {
-//            ProjectVerticle vert = new ProjectVerticle(this, promise, srcProjectFolderPath, this.logger);
-//            this.vertx.deployVerticle(vert).onComplete(id -> this.verticleIDs.add(id.result()));
-//            promise.future().onFailure(res -> {
-//                if (!res.getMessage().equals(Logger.STOP_ANALYZING_PROJECT)) {
-//                    logger.logError(res.getMessage());
-//                }
-//            });
-//        }
-//        return promise.future();
-        return null;
+    public Observable<PackageReport> getPackageReport(String... srcPackagePath) {
+        return Observable.fromStream(Stream.of(srcPackagePath).map((path) -> {
+            var packageReport = new PackageReportImpl();
+            packageReport.setFullPath(path);
+            var folder = new File(path);
+            Stream.of(Objects.requireNonNull(folder.listFiles((dir, name) -> name.endsWith(".java"))))
+                    .map(File::getPath)
+                    .collect(Collectors.groupingBy(elem -> {
+                        try {
+                            return this.getCompilationUnit(elem).getType(0).asClassOrInterfaceDeclaration().isInterface();
+                        } catch (FileNotFoundException e) {
+                            throw new RuntimeException(e);
+                        }
+                    })).forEach((isInterface, list) -> {
+                        if (isInterface) {
+                            getInterfaceReport(list.toArray(new String[0])).subscribe(packageReport::addInterfaceReport);
+                        } else {
+                            getClassReport(list.toArray(new String[0])).subscribe(packageReport::addClassReport);
+                        }
+                    });
+            setPackageNameAndFullName(packageReport);
+            logger.log(packageReport);
+            return packageReport;
+        }));
     }
 
     @Override
-    public void analyzeProject(String srcProjectFolderName, String topic) {
-//        this.vertx.eventBus().consumer(topic, m -> {
-//            if (m.body().toString().equals(Logger.STOP_ANALYZING_PROJECT)) this.stopLibrary();
-//        });
-//        this.logger = message -> vertx.eventBus().publish(topic, message);
-//        this.getProjectReport(srcProjectFolderName).onFailure(res -> {
-//            if (res.getMessage().equals(Logger.STOP_ANALYZING_PROJECT)) {
-//                logger.logInterrupt(res.getMessage());
-//            } else {
-//                logger.logError(res.getMessage());
-//            }
-//        });
+    public Observable<ProjectReport> getProjectReport(String srcProjectFolderPath) {
+        return Observable.fromCallable(() -> {
+            var projectReport = new ProjectReportImpl();
+            var folder = new File(srcProjectFolderPath);
+            var list = Stream
+                    .concat(Stream.of(folder.toString()), Stream.of(Objects.requireNonNull(folder.listFiles()))
+                            .filter(File::isDirectory)
+                            .map(File::getPath))
+                    .toList();
+            getPackageReport(list.toArray(new String[0])).subscribe(item -> {
+                item.getClassesReports().stream()
+                        .filter(c -> c.getMethodsInfo().stream().anyMatch(m -> m.getName().equals("main")))
+                        .findFirst()
+                        .ifPresent(projectReport::setMainClass);
+                projectReport.addPackageReport(item);
+            });
+            logger.log(projectReport);
+            return projectReport;
+        });
     }
 
-    private void stopLibrary() {
+    @Override
+    public Observable<ProjectDTO> analyzeProject(String srcProjectFolderName) {
+        return Observable.fromCallable(() -> {
+            final ProjectDTO[] res = {DTOs.createProjectDTO(new ProjectReportImpl())};
+            getProjectReport(srcProjectFolderName).subscribe(e -> res[0] = DTOs.createProjectDTO(e));
+            return res[0];
+        });
     }
 
     /**
@@ -125,4 +133,19 @@ public class ReactiveProjectAnalyzer implements ProjectAnalyzer {
     CompilationUnit getCompilationUnit(String path) throws FileNotFoundException {
         return StaticJavaParser.parse(new File(path));
     }
+
+    private void setPackageNameAndFullName(PackageReportImpl packageReport) {
+        var name = "Package name not found";
+        var fullPath = "Full name not found";
+        Report report = !packageReport.getClassesReports().isEmpty() ? packageReport.getClassesReports().get(0) :
+                (!packageReport.getInterfaceReports().isEmpty() ? packageReport.getInterfaceReports().get(0) : null);
+        if (report != null) {
+            var s = report.getSourceFullPath().split("\\.");
+            fullPath = s.length == 1 ? "" : report.getSourceFullPath().substring(0, report.getSourceFullPath().length() - report.getName().length() - 1);
+            name = s.length == 1 ? "." : (s[s.length - 2]);
+        }
+        packageReport.setName(name);
+        packageReport.setFullPath(fullPath);
+    }
+
 }

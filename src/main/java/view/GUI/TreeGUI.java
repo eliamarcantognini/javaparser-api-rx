@@ -1,10 +1,6 @@
 package view.GUI;
 
-import lib.dto.ClassInterfaceDTO;
-import lib.dto.DTOParser;
-import lib.dto.DTOs;
-import lib.dto.PackageDTO;
-import lib.dto.ProjectDTO;
+import lib.dto.*;
 import view.View;
 import view.ViewListener;
 import view.utils.Commands;
@@ -18,13 +14,13 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
 /**
- * Analysis GUI
+ * View that renders the JTree.
  */
 public class TreeGUI implements View {
 
     private static final int HEIGHT_OFFSET = 30;
     private static final int WIDTH_DIVISOR = 2;
-    public static boolean error = false;
+    private static boolean error = false;
 
     private VisualiserFrame frame;
     private JButton btnStart;
@@ -114,12 +110,17 @@ public class TreeGUI implements View {
                 var j = new JOptionPane();
                 var o = j.createDialog(frame, title);
                 j.setMessage(message);
-                o.addWindowListener(new MyWindowListener());
+                o.addWindowListener(new ChooserWindowsListener());
                 o.setVisible(true);
             });
         }
     }
 
+    /**
+     * Set true if error is launched from controller.
+     *
+     * @param enabled - the error status.
+     */
     public static void setError(boolean enabled) {
         error = enabled;
     }
@@ -146,26 +147,59 @@ public class TreeGUI implements View {
             btnPane.add(btnSave);
 
             getContentPane().add(btnPane, BorderLayout.NORTH);
-
+            this.addWindowListener(new TreeLoggerWindowsListener());
             this.setVisible(true);
         }
 
     }
 
-    private static class MyWindowListener implements WindowListener {
-        @Override
+    private class TreeLoggerWindowsListener implements WindowListener {
+        public void windowOpened(WindowEvent e) {
+        }
+
+        public void windowClosing(WindowEvent e) {
+            loggerGUI.close();
+        }
+
+        public void windowClosed(WindowEvent e) {
+        }
+
+        public void windowIconified(WindowEvent e) {
+        }
+
+        public void windowDeiconified(WindowEvent e) {
+        }
+
+        public void windowActivated(WindowEvent e) {
+        }
+
+        public void windowDeactivated(WindowEvent e) {
+        }
+    }
+
+    private static class ChooserWindowsListener implements WindowListener {
         public void windowOpened(WindowEvent e) {
             setError(true);
         }
-        @Override
+
         public void windowClosed(WindowEvent e) {
             setError(false);
         }
-        public void windowClosing(WindowEvent e) {}
-        public void windowIconified(WindowEvent e) {}
-        public void windowDeiconified(WindowEvent e) {}
-        public void windowActivated(WindowEvent e) {}
-        public void windowDeactivated(WindowEvent e) {}
+
+        public void windowClosing(WindowEvent e) {
+        }
+
+        public void windowIconified(WindowEvent e) {
+        }
+
+        public void windowDeiconified(WindowEvent e) {
+        }
+
+        public void windowActivated(WindowEvent e) {
+        }
+
+        public void windowDeactivated(WindowEvent e) {
+        }
     }
 
 }

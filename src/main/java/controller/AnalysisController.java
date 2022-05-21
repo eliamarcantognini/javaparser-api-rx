@@ -1,10 +1,17 @@
 package controller;
 
+import io.reactivex.rxjava3.annotations.NonNull;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Observer;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.observers.DefaultObserver;
 import lib.Logger;
 import lib.ProjectAnalyzer;
 import lib.dto.DTOParser;
+import lib.dto.DTOs;
 import lib.dto.PackageDTO;
 import lib.dto.ProjectDTO;
+import lib.reports.interfaces.ProjectReport;
 import lib.rx.ReactiveProjectAnalyzer;
 import view.View;
 import view.utils.Strings;
@@ -24,21 +31,29 @@ public class AnalysisController {
      * File where analysis will be saved
      */
     private final static String OUTPUT_PATH = "./output.json";
-    /**
-     * Channel of vertx eventBus where analysis messages are exchanged
-     */
-    private final static String VERTX_CHANNEL_TOPIC = "new_find";
 
-    private ProjectAnalyzer projectAnalyzer;
+    private final ProjectAnalyzer projectAnalyzer;
     private ProjectDTO projectDTO;
     private View view;
     private String pathProjectToAnalyze;
+    private Disposable projectDisposable;
 
     /**
      * Constructor of class
      */
     public AnalysisController() {
-        this.projectAnalyzer = new ReactiveProjectAnalyzer();
+        /**
+         * Implement the onNext method to manage the library's logger stream of messages.
+         * In this case, the controller takes every message sent by the logger and manage it in the manageMessage method.
+         */
+        Observer<String> observer = new Observer<>() {
+            public void onSubscribe(@NonNull Disposable d) {}
+            @Override
+            public void onNext(@NonNull String s) { manageMessage(s); }
+            public void onError(@NonNull Throwable e) {}
+            public void onComplete() {}
+        };
+        this.projectAnalyzer = new ReactiveProjectAnalyzer(observer);
     }
 
     /**
@@ -63,19 +78,26 @@ public class AnalysisController {
      * Start project analysis for project passed in {@link #setPathProjectToAnalyze(String)}
      */
     public void startAnalysisProject() {
-        this.setViewBehaviourAtStarts();
-        this.projectAnalyzer.analyzeProject(this.pathProjectToAnalyze, AnalysisController.VERTX_CHANNEL_TOPIC);
+        this.setViewBehaviourAtStarts(true);
+        projectDisposable = this.projectAnalyzer.analyzeProject(this.pathProjectToAnalyze).subscribe(result -> {
+            this.projectDTO = result;
+            this.view.setStopEnabled(false);
+            this.view.setSaveEnabled(true);
+            this.view.renderTree(projectDTO);
+            this.view.printText("PROJECT ANALYZE DONE.");
+        });
     }
 
     /**
      * Stop project analysis
      */
     public void stopAnalysisProject() {
-        this.view.setStopEnabled(false);
+        setViewBehaviourAtStarts(false);
+        projectDisposable.dispose();
     }
 
     /**
-     * Save project report got from analysis in file named "output.json
+     * Save project report got from analysis in file named "output.json"
      */
     public void saveProjectReportToFile() {
         try {
@@ -86,31 +108,33 @@ public class AnalysisController {
         } catch (IOException e) {
             this.view.showError(Strings.SOMETHING_WENT_WRONG, Strings.SAVE_ERROR);
         }
-
     }
 
-    private void setViewBehaviourAtStarts() {
-        this.view.setStartEnabled(false);
-        this.view.setSaveEnabled(false);
-        this.view.setStopEnabled(true);
+    private void setViewBehaviourAtStarts(boolean start) {
+        this.view.setStartEnabled(!start);
+        this.view.setSaveEnabled(!start);
+        this.view.setStopEnabled(start);
     }
 
+    /**
+     * Method that takes a string and based on the code found at its start it does an action.
+     *
+     * @param message the String to manage
+     */
     private void manageMessage(final String message) {
-
         if (message.startsWith(Logger.CodeElementFound.PROJECT.getCode())) {
             this.projectDTO = DTOParser.parseProjectDTO(message.substring(Logger.CodeElementFound.PROJECT.getCode().length()));
-            this.view.setSaveEnabled(true);
-            this.view.setStopEnabled(false);
-            this.view.renderTree(projectDTO);
+            var s = projectDTO.mainClass().name().isBlank() ? "" : ("entry point at " + projectDTO.mainClass().name() + " class and ");
+            this.view.printText("Finished parsing. Project has " + s + projectDTO.packages().size() + " packages.");
         } else if (message.startsWith(Logger.CodeElementFound.PACKAGE.getCode())) {
             PackageDTO packageFound = DTOParser.parsePackageDTO(message.substring(Logger.CodeElementFound.PACKAGE.getCode().length()));
-            this.view.printText("Found package " + packageFound.name() + " at path " + packageFound.path());
+            this.view.printText("Found package " + packageFound.path());
         } else if (message.startsWith(Logger.CodeElementFound.CLASS.getCode())) {
             var classFound = DTOParser.parseClassInterfaceDTO(message.substring(Logger.CodeElementFound.CLASS.getCode().length()));
-            this.view.printText("Found class " + classFound.name() + " at path " + classFound.path());
+            this.view.printText("Found class " + classFound.name() + " with fully classified name " + classFound.path());
         } else if (message.startsWith(Logger.CodeElementFound.INTERFACE.getCode())) {
             var interfaceFound = DTOParser.parseClassInterfaceDTO(message.substring(Logger.CodeElementFound.INTERFACE.getCode().length()));
-            this.view.printText("Found interface " + interfaceFound.name() + " at path " + interfaceFound.path());
+            this.view.printText("Found interface " + interfaceFound.name() + " with fully classified name " + interfaceFound.path());
         } else if (message.startsWith(Logger.CodeElementFound.METHOD.getCode())) {
             var methodFound = DTOParser.parseMethodDTO(message.substring(Logger.CodeElementFound.METHOD.getCode().length()));
             this.view.printText("Found method " + methodFound.name());

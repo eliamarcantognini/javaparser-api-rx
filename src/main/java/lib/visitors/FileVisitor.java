@@ -18,6 +18,9 @@ import lib.reports.interfaces.InterfaceReport;
 public class FileVisitor<T extends InterfaceReport> extends VoidVisitorAdapter<T> {
 
     private final boolean attachModifiers;
+    /**
+     * @see Logger
+     */
     protected Logger logger;
 
     /**

@@ -1,17 +1,17 @@
 package lib;
 
+import io.reactivex.rxjava3.core.Observable;
+import lib.dto.ProjectDTO;
 import lib.reports.interfaces.ClassReport;
 import lib.reports.interfaces.InterfaceReport;
 import lib.reports.interfaces.PackageReport;
 import lib.reports.interfaces.ProjectReport;
 
-import java.util.concurrent.Future;
-
 /**
  * Interface of a project analyzer. It contains methods to get async
- * reports using {@link java.util.concurrent.Future}
+ * reports using {@link io.reactivex.rxjava3.core.Observable}
  *
- * @see java.util.concurrent.Future
+ * @see io.reactivex.rxjava3.core.Observable
  * @see InterfaceReport
  * @see ClassReport
  * @see PackageReport
@@ -20,47 +20,46 @@ import java.util.concurrent.Future;
 public interface ProjectAnalyzer {
 
     /**
-     * Async method to retrieve the report about a specific interface,
+     * Async method to retrieve the report about a variable number of  interface,
      * given the full path of the interface source file
      *
-     * @param srcInterfacePath path to interface
-     * @return InterfaceReport future
+     * @param srcInterfacePath variable argument for file paths
+     * @return InterfaceReport observable
      */
-    Future<InterfaceReport> getInterfaceReport(String srcInterfacePath);
+    Observable<InterfaceReport> getInterfaceReport(String... srcInterfacePath);
 
     /**
-     * Async method to retrieve the report about a specific class,
+     * Async method to retrieve the report about a variable number of  class,
      * given the full path of the class source file
      *
-     * @param srcClassPath path to class
-     * @return ClassReport future
+     * @param srcClassPath variable argument for file paths
+     * @return ClassReport observable
      */
-    Future<ClassReport> getClassReport(String srcClassPath);
+    Observable<ClassReport> getClassReport(String... srcClassPath);
 
     /**
-     * Async method to retrieve the report about a package,
+     * Async method to retrieve the report about a variable number of package,
      * given the full path of the package folder
      *
-     * @param srcPackagePath path to package
-     * @return PackageReport future
+     * @param srcPackagePath variable argument for folder paths
+     * @return PackageReport observable
      */
-    Future<PackageReport> getPackageReport(String srcPackagePath);
+    Observable<PackageReport> getPackageReport(String... srcPackagePath);
 
     /**
      * Async method to retrieve the report about a project
      * given the full path of the project folder
      *
      * @param srcProjectFolderPath path to project
-     * @return ProjectReport future
+     * @return ProjectReport observable
      */
-    Future<ProjectReport> getProjectReport(String srcProjectFolderPath);
+    Observable<ProjectReport> getProjectReport(String srcProjectFolderPath);
 
     /**
      * Async function that analyze a project given the full path of the project folder.
-     * Real time result were sent in topic specified.
      *
      * @param srcProjectFolderName path to project
-     * @param topic                topic where analysis results messages where sent
+     * @return an observable
      */
-    void analyzeProject(String srcProjectFolderName, String topic);
+    Observable<ProjectDTO> analyzeProject(String srcProjectFolderName);
 }

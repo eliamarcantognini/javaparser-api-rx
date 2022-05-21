@@ -5,6 +5,7 @@ import view.utils.Strings;
 import javax.swing.*;
 import javax.swing.text.DefaultCaret;
 import java.awt.*;
+import java.awt.event.WindowEvent;
 
 /**
  * GUI used to display the log sent by the library.
@@ -37,6 +38,13 @@ public class LoggerGUI {
      */
     public void printText(String textToPrint) {
         frame.addText(textToPrint);
+    }
+
+    /**
+     * Close the View.
+     */
+    public void close() {
+        this.frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
     }
 
     private class VisualiserFrame extends JFrame {

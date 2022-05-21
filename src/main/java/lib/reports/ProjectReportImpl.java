@@ -55,6 +55,6 @@ public class ProjectReportImpl implements ProjectReport {
 
     @Override
     public String toString() {
-        return "Project Report:\n" + "\tProject Reports: \n" + this.packageReports + "\n";
+        return "Project Report:\n" + "\tMain class: " + this.getMainClass() + "\n" + "\tPackage Reports: \n" + this.packageReports + "\n";
     }
 }
