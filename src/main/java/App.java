@@ -3,6 +3,10 @@ import view.GUI.StartGUI;
 import view.GUI.TreeGUI;
 import view.ViewListener;
 
+/*
+ * Elaborato di Elia Marcantognini, Michele Bachetti, Angelo Tinti
+ */
+
 /**
  * Main class of the project.
  */
